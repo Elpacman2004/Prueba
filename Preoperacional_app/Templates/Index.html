@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index page</title>
+    <link rel="stylesheet" href="{% static "Styles/Index.css" %}">
+</head>
+<style>
+    body{
+        background-image: url("{% static 'Img/Paisaje.jpg' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    
+</style>
+
+<header>
+    <center><h1>Formulario preoperacional de vehículo</h1></center>
+</header>
+
+<body>    
+    <center>
+        <div class="Info">
+            <p>En el siguiente formulario se verificará el estado del vehículo antes de ponerse en operación.</p>
+            <p>¿Para qué sirve una inspección preoperacional?</p>
+            <p>es un conjunto de revisiones que se realizan antes de poner en marcha cualquier tipo de vehículo. Esta práctica busca identificar cualquier anomalía o defecto que pueda comprometer la seguridad del vehículo y de quienes lo utilizan. Además, permite realizar un mantenimiento preventivo que puede prolongar la vida útil del vehículo y optimizar su rendimiento.</p>
+            <button><a href="http://127.0.0.1:8000/GeneralForm/">Continuar</a></button>
+        </div>
+    </center>
+    
+</body>
+</html>

@@ -1,0 +1,122 @@
+body {
+    background-image: url("{% static 'Img/Inspeccion.jfif' %}");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    color: #fff;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="password"],
+.form-check-input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
+}
+
+.form-check {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-group .form-check-label {
+    margin-left: 5px;
+    color: #fff;
+}
+
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #fff;
+    color: #4CAF50;
+}
+
+/* Estilos para el campo de subir foto */
+#fotoInput {
+    display: none; /* Ocultar el campo de foto inicialmente */
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #333;
+}
+
+#fotoInput label {
+    display: block;
+    color: #4CAF50;
+    margin-bottom: 5px;
+}
+
+#fotoInput input[type="file"] {
+    display: block;
+    background-color: transparent;
+    color: #4CAF50;
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+#fotoInput input[type="file"]:hover {
+    background-color: #4CAF50;
+    color: #fff;
+}
+
+#fotoInput button {
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#fotoInput button:hover {
+    background-color: #fff;
+    color: #4CAF50;
+}
+
+.Error {
+    color: rgb(204, 0, 0);
+}
+

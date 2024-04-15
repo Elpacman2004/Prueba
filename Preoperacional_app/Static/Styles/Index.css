@@ -1,0 +1,58 @@
+body {
+    align-items: center;
+}
+
+/* Estilos para el contenedor */
+.container {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    text-align: center; 
+}
+
+/* Estilos para el contenido */
+.Info {
+    background-color: black;
+    max-width: 600px; 
+    padding: 20px; 
+    border-radius: 10px;
+    color: white;
+}
+
+/* Estilos para el título */
+h1 {
+    font-size: 24px; 
+}
+
+/* Estilos para los párrafos */
+p {
+    font-size: 16px; 
+}
+
+/* Estilos para el botón */
+button {
+    background-color: #4CAF50; 
+    color: #fff; 
+    border: none; 
+    padding: 10px 20px; 
+    cursor: pointer; 
+    border-radius: 5px; 
+    font-size: 16px; 
+    margin-top: 20px; 
+    transition: background-color 0.3s, color 0.3s; /* Transición suave para el cambio de color */
+}
+
+button:hover {
+    background-color: #fff; /* Cambia el color de fondo al pasar el cursor */
+    color: #4CAF50; /* Cambia el color del texto al pasar el cursor */
+}
+
+
+header {
+    color: #ffffff;
+    background-color: #008d0cc9;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}

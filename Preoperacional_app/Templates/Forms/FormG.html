@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Inspección</title>
+    <link rel="stylesheet" href="{% static "Styles/FormI.css" %}">
+</head>
+<style> 
+    body {
+        background-image: url("{% static 'Img/Inspeccion.jfif' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    } 
+</style>
+<body>
+    <div class="container">
+        <h2>Formulario de Inspección del costado</h2>
+        <form method="POST">
+            <div class='Error'>
+                {{Error}}
+            </div>
+            {% csrf_token %}
+            {{form}}   
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+
+</body>
+</html>

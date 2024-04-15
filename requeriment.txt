@@ -1,0 +1,68 @@
+Django == 3.2.25
+Pillow == 9.5.0
+
+
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Inspección</title>
+    <link rel="stylesheet" href="{% static "Styles/FormI.css" %}">
+</head>
+<style> 
+    body {
+        background-image: url("{% static 'Img/Inspeccion.jfif' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    } 
+</style>
+<body>
+    <div class="container">
+        <h2>Formulario de Inspección parte delantera</h2>
+        <form  method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                <div class="form-group">
+                    {% if field.name == 'vehiculo' or field.name == 'fecha' or field.name == 'kilometraje_inicial' or field.name == 'Nivel_gasometro' %}
+                        {{ field }}
+                    {% endif %}
+                    {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_gasometro' %}
+                        <div class="checkbox-group" data-group-name="{{ field.label }}">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="{{ field.auto_id }}" name="{{ field.html_name }}">
+                                <label class="form-check-label" for="{{ field.auto_id }}">Cumple</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="{{ field.auto_id }}_NoCumple" name="{{ field.html_name }}_NoCumple">
+                                <label class="form-check-label" for="{{ field.auto_id }}_NoCumple">No cumple</label>
+                            </div>
+                            
+                            <div id="fotoInput_{{ field.auto_id }}" style="display: none;">
+                                <label for="foto_{{ field.auto_id }}">Subir Foto:</label>
+                                <input type="file" id="foto_{{ field.auto_id }}" name="{{ field.html_name }}_NC" accept="image/*">
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="{{ field.auto_id }}_NA" name="{{ field.html_name }}_NA">
+                                <label class="form-check-label" for="{{ field.auto_id }}_NA">No aplica</label>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}   
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+    <script src="{% static 'Js/Form.js' %}"></script>
+</body>
+</html>
