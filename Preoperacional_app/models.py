@@ -17,6 +17,7 @@ class Datos_generales(models.Model):
 
 class Inspeccion(models.Model):
     vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE)
+
     fecha = models.DateField(default=timezone.now)
     
     Nivel_aceite = models.BooleanField(default=False )

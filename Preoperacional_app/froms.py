@@ -14,18 +14,43 @@ class InspeccionForm(forms.ModelForm):
             'vehiculo',
             'fecha',
             'Nivel_aceite',
+            'capot_asegurado',
             'kilometraje_inicial',
             'Nivel_gasometro',
         ]
-        
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name in self.fields:
             self.fields[field_name].widget.attrs['class'] = 'form-control'
-
-
-
+            
+class InspeccionFormNC(forms.ModelForm):
+    class Meta:
+        model = Inspeccion
+        fields = [
+            'Nivel_aceite_NC',
+            'capot_asegurado_NC',
+        ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs['class'] = 'form-control'
+            
+class InspeccionFormNA(forms.ModelForm):
+    class Meta:
+        model = Inspeccion
+        fields = [
+            'Nivel_aceite_NA',
+            'capot_asegurado_NA',
+        ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs['class'] = 'form-control'
+            
+            
 class ParteDelanteraForm(forms.ModelForm):
     class Meta:
         model = ParteDelantera

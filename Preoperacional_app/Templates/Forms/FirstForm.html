@@ -41,14 +41,14 @@
                                 <label class="form-check-label" for="{{ field.auto_id }}_NoCumple">No cumple</label>
                             </div>
                             
-                            <div id="fotoInput_{{ field.auto_id }}" style="display: none;">
-                                <label for="foto_{{ field.auto_id }}">Subir Foto:</label>
-                                <input type="file" id="foto_{{ field.auto_id }}" name="{{ field.html_name }}_NC" accept="image/*">
+                            <div id="{{ field_NC.auto_id }}" style="display: none;">
+                                <label for="{{ field_NC.auto_id }}">Subir Foto:</label>
+                                <input type="file" id="{{ field_NC.auto_id }}" name="{{ field_NC.html_name }}" accept="image/*">
                             </div>
 
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="{{ field.auto_id }}_NA" name="{{ field.html_name }}_NA">
-                                <label class="form-check-label" for="{{ field.auto_id }}_NA">No aplica</label>
+                                <input class="form-check-input" type="checkbox" id="{{ field_NA.auto_id }}" name="{{ field_NA.html_name }}">
+                                <label class="form-check-label" for="{{ field_NA.auto_id }}">No aplica</label>
                             </div>
                         </div>
                     {% endif %}
