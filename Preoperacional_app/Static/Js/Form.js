@@ -1,74 +1,36 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const checkboxGroups = document.querySelectorAll('.checkbox-group');
+    // Encuentra todos los radio buttons de "No Cumple" en el formulario
+    const noCumpleRadioButtons = document.querySelectorAll('input[type="radio"][value="NC"]');
 
-    checkboxGroups.forEach(group => {
-        const checkboxes = group.querySelectorAll('input[type="checkbox"]');
-        const noCumpleCheckbox = group.querySelector('input[name*="_NoCumple"]');
-        const fotoInput = group.querySelector(`#fotoInput_${noCumpleCheckbox.id.replace('_NoCumple', '')}`);
+    // Oculta todos los inputs de archivo relacionados al inicio
+    noCumpleRadioButtons.forEach(radio => {
+        const fotoInput = radio.closest('ul').querySelector('input[type="file"]');
+        if (fotoInput) {
+            fotoInput.style.display = 'none';
+        }
+    });
 
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                checkboxes.forEach(cb => {
-                    if (cb !== checkbox) {
-                        cb.checked = false;
-                    }
-                });
-
-                const fotoInputForCheckbox = group.querySelector(`#fotoInput_${checkbox.id.replace('_Cumple', '')}`);
-                if (checkbox === noCumpleCheckbox) {
-                    fotoInput.style.display = checkbox.checked ? 'block' : 'none';
-                } else {
-                    fotoInputForCheckbox.style.display = 'none';
-                }
-            });
-        });
-
-        // Asignar evento 'change' al checkbox 'No cumple' para mostrar u ocultar el campo de foto
-        noCumpleCheckbox.addEventListener('change', () => {
-            fotoInput.style.display = noCumpleCheckbox.checked ? 'block' : 'none';
+    // Añade un evento de cambio a cada radio button para mostrar/ocultar el input de archivo
+    noCumpleRadioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const fotoInput = radio.closest('ul').querySelector('input[type="file"]');
+            if (fotoInput) {
+                // Muestra el input de archivo solo si el radio button de "No Cumple" está seleccionado
+                fotoInput.style.display = radio.checked ? 'block' : 'none';
+            }
         });
     });
 
-    // Validación del formulario
-    const form = document.querySelector('form');
-    form.addEventListener('submit', (event) => {
-        let isValid = true;
-        let missingFields = [];
-
-        checkboxGroups.forEach(group => {
-            const checkboxes = group.querySelectorAll('input[type="checkbox"]');
-            let isChecked = false;
-            let missingGroupFields = [];
-
-            checkboxes.forEach(checkbox => {
-                if (checkbox.checked) {
-                    isChecked = true;
-
-                    if (checkbox === group.querySelector('input[name*="_NoCumple"]')) {
-                        const fieldName = checkbox.name.replace('_NoCumple', '');
-                        const fotoField = form.querySelector(`input[name="${fieldName}_NC"]`);
-                        
-                        if (!fotoField || !fotoField.files || fotoField.files.length === 0) {
-                            missingGroupFields.push(`${fieldName} y subir una foto`);
-                        }
-                    }
+    // Añade un evento de cambio a cada grupo de radio buttons para verificar que al menos una opción esté seleccionada
+    const radioGroups = document.querySelectorAll('ul[data-group]');
+    radioGroups.forEach(group => {
+        const radioButtons = group.querySelectorAll('input[type="radio"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (!this.checked && !group.querySelector('input[type="radio"]:checked')) {
+                    alert('Debe seleccionar al menos una opción en este grupo.');
                 }
             });
-
-            if (!isChecked) {
-                missingGroupFields.push('al menos una opción');
-            }
-
-            if (missingGroupFields.length > 0) {
-                isValid = false;
-                missingFields.push(`Debes completar ${missingGroupFields.join(', ')} en este grupo.`);
-            }
         });
-
-        // Mostrar alerta si hay campos faltantes
-        if (!isValid) {
-            event.preventDefault(); // Evitar envío del formulario si hay errores
-            alert(missingFields.join('\n')); // Mostrar mensaje con todos los campos faltantes
-        }
     });
 });
