@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Inspección</title>
+    <link rel="stylesheet" href={% static "Styles/FormI.css" %}>
+</head>
+<style> 
+    body {
+        background-image: url("{% static 'Img/Inspeccion.jfif' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    } 
+
+</style>
+<body>
+    <div class="container">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h2>{{Title}}</h2>
+            <div class='Error'>
+                {{error}}
+            </div>
+               {% for field in form %}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                            {% if field.name == 'vehiculo' or field.name == 'fecha' or field.name == 'kilometraje_inicial' or field.name == 'Nivel_gasometro' %}
+                                {{ field }}
+                            {% endif %}
+                            {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_gasometro' %}
+                                <div class ='radio-group' data-group-name="{{ field.label }}">
+                                    <ul>
+                                        <li>
+                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="C">
+                                            <label class="form-check-label" for="{{ field.auto_id }}">Cumple</label>
+                                        </li>
+                                            
+                                        <li>
+                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="NC">
+                                            <label class="form-check-label" for="{{ field.auto_id }}">No cumple</label>
+                                        </li>
+                                        
+                                        <li>
+                                            <div id="fotoInput_id_Nivel_aceite" style="display: none;">
+                                                <label for="{{ field.auto_id }}_NC">Subir Imagen:</label>
+                                                <input type="file" id="{{ field.auto_id }}_NC" name="{{ field.html_name }}_NC" accept="image/*">
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="NA">
+                                            <label class="form-check-label" for="{{ field.auto_id }}">No Aplica</label>
+                                        </li>
+                                    </ul>
+                                </div>
+                            {% endif %} 
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+    <script src="{% static 'Js/Form.js' %}"></script>
+</body>

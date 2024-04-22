@@ -1,37 +1,36 @@
 from django import forms
-from .models import Datos_generales, Inspeccion
+from .models import Datos_generales, Inspeccion, FrontPart, Side, BackPart, Vehiculo
+from dal import autocomplete
 
 class DatosGeneralesForm(forms.ModelForm):
+    
+    vehiculo = forms.ModelChoiceField(
+        queryset=Vehiculo.objects.all(),
+        widget=autocomplete.ModelSelect2(url='GeneralForm')
+    )    
     class Meta:
         model = Datos_generales
-        fields = ['Fecha', 'Proyecto', 'Nombre']
+        fields = ['Fecha', 'Proyecto', 'Nombre', 'vehiculo']
 
 class InspeccionForm(forms.ModelForm):
-    OPCIONES = [
-        ('C', 'Cumple'),
-        ('NC', 'No Cumple'),
-        ('NA', 'No Aplica'),
-    ]
-    
-    names = {
-        'C': 'Cumple',
-        'NC': 'No Cumple',
-        'NA': 'No Aplica',
-        }
-    
-
-    # Convertimos los campos booleanos a campos de elección
-    Nivel_aceite = forms.ChoiceField(choices=OPCIONES, label='Nivel de aceite', widget=forms.RadioSelect)
-    capot_asegurado = forms.ChoiceField(choices=OPCIONES, label='Capot asegurado', widget=forms.RadioSelect)
-
     class Meta:
         model = Inspeccion
         fields = [
-            'vehiculo',
-            'fecha',
             'Nivel_aceite',
             'capot_asegurado',
+            'bornes_baterias_ajustados',
+            'indicadores_tablero_control',
             'kilometraje_inicial',
+            'aire_acondicionado',
+            'freno_estacionamiento',
+            'limpiaparabrisas',
+            'pito_electrico',
+            'cinturones_seguridad',
+            'equipo_prevencion_seguridad',
+            'botiquin_primeros_auxilios',
+            'extintor',
+            'kit_carreteras',
+            'sensor_externo_velocidad',
             'Nivel_gasometro',
         ]
         
@@ -40,4 +39,53 @@ class InspeccionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field_name in self.fields:
             self.fields[field_name].widget.attrs['class'] = 'form-control'
+            
+class FrontPartForm (forms.ModelForm):
 
+    class Meta:
+        model = FrontPart
+        fields = [
+            'funcionamiento_luces_delanteras',
+            'vidrio_delantero_sin_fisuras',
+            'placa_delantera_legible',
+            'Labrado_de_las_llantas_delanteras',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs['class'] = 'form-control'  
+
+class SideForm (forms.ModelForm):
+
+    class Meta:
+        model = Side
+        fields = [
+            'carroceria_buen_estado',
+            'vidrios_laterales_sin_fisuras',
+            'direccionales_funcionando',
+            'espejo_exterior_buen_estado',
+            'sin_fugas_tanque_combustible',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs['class'] = 'form-control'
+            
+class BackPartForm (forms.ModelForm):
+
+    class Meta:
+        model = BackPart
+        fields = [   
+            'luces_traseras_funcionando',
+            'sonido_alarma_reversa',
+            'labrado_llantas_traseras',
+            'labrado_llanta_repuesto',
+            'placa_trasera_legible',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs['class'] = 'form-control'

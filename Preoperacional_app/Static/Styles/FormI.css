@@ -40,21 +40,6 @@ input[type="password"],
     color: #fff;
 }
 
-.form-check {
-    display: inline-block;
-    margin-right: 10px;
-}
-
-.checkbox-group {
-    display: flex;
-    align-items: center;
-}
-
-.checkbox-group .form-check-label {
-    margin-left: 5px;
-    color: #fff;
-}
-
 .btn-primary {
     display: block;
     width: 100%;
@@ -72,51 +57,61 @@ input[type="password"],
     color: #4CAF50;
 }
 
-/* Estilos para el campo de subir foto */
-#fotoInput {
-    display: none; /* Ocultar el campo de foto inicialmente */
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    background-color: #333;
-}
-
-#fotoInput label {
-    display: block;
-    color: #4CAF50;
-    margin-bottom: 5px;
-}
-
-#fotoInput input[type="file"] {
-    display: block;
-    background-color: transparent;
-    color: #4CAF50;
-    border: 2px solid #4CAF50;
-    border-radius: 5px;
-    padding: 5px;
-    margin-top: 5px;
-}
-
-#fotoInput input[type="file"]:hover {
-    background-color: #4CAF50;
-    color: #fff;
-}
-
-#fotoInput button {
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-
-#fotoInput button:hover {
-    background-color: #fff;
-    color: #4CAF50;
-}
-
 .Error {
     color: rgb(204, 0, 0);
 }
 
+/* Estilo para el label de los radio buttons */
+.radio-vertical label {
+    display: inline-block; /* Alinea los labels en línea */
+    margin-right: 10px; /* Espacio entre el label y el radio button */
+}
+
+/* Estilo para el contenedor del menú de subir foto */
+#menu-subir-foto {
+    background-color: #ffffff; /* Fondo blanco */
+    padding: 20px; /* Espacio interno alrededor del menú */
+    border-radius: 5px; /* Bordes redondeados */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+/* Estilo para el botón de subir foto */
+#btn-subir-foto {
+    background-color: #4caf50; /* Color verde */
+    color: #ffffff; /* Texto blanco */
+    padding: 10px 20px; /* Padding interno */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    cursor: pointer; /* Cambia el cursor a mano al pasar el mouse */
+    transition: background-color 0.3s ease; /* Transición suave al cambiar color */
+}
+
+/* Estilo para cambiar el color de fondo del botón al pasar el mouse */
+#btn-subir-foto:hover {
+    background-color: #388e3c; /* Color verde más oscuro al pasar el mouse */
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.radio-group label {
+    margin-right: 10px;
+}
+
+.form-check-input {
+    margin-right: 5px;
+}
+
+.form-check-input:checked + .form-check-label {
+    color: #388e3c;
+}
+
+.form-check-input:checked + .form-check-label::before {
+    content: "";
+    color: transparent;
+    margin-right: 5px;
+}
