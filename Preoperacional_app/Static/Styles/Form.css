@@ -50,11 +50,12 @@ input[type="password"],
     color: #fff;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
+    position: relative;
 }
 
 .btn-primary:hover {
     background-color: #fff;
-    color: #4CAF50;
+    color: #4CAF50; 
 }
 
 .Error {
@@ -91,6 +92,16 @@ input[type="password"],
     background-color: #388e3c; /* Color verde más oscuro al pasar el mouse */
 }
 
+/* Asegúrate de que el contenedor del formulario no oculta el contenido desbordado */
+#id-de-tu-contenedor {
+    overflow: visible;
+}
+
+/* Asegúrate de que el botón de enviar está en el flujo normal del documento */
+#id-de-tu-boton {
+    position: relative;
+}
+
 .radio-group {
     display: flex;
     flex-direction: row;
@@ -114,4 +125,22 @@ input[type="password"],
     content: "";
     color: transparent;
     margin-right: 5px;
+}
+
+.btn.btn-primary {
+    position: relative;
+}
+
+.ui-autocomplete {
+    position: relative;
+}
+
+.ui-autocomplete {
+    background-color: rgb(0, 0, 0);
+    overflow: visible;
+    color: rgb(255, 255, 255);
+}
+
+form {
+    overflow: visible;
 }

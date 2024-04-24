@@ -1,16 +1,25 @@
 from django import forms
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Datos_generales, Inspeccion, FrontPart, Side, BackPart, Vehiculo
 from dal import autocomplete
+from dal_select2.widgets import ModelSelect2
 
 class DatosGeneralesForm(forms.ModelForm):
     
-    vehiculo = forms.ModelChoiceField(
-        queryset=Vehiculo.objects.all(),
-        widget=autocomplete.ModelSelect2(url='GeneralForm')
-    )    
+    vehiculo = forms.CharField(max_length=200)    
     class Meta:
+        
         model = Datos_generales
         fields = ['Fecha', 'Proyecto', 'Nombre', 'vehiculo']
+        
+    def clean_vehiculo(self):
+        vehiculo_str = self.cleaned_data.get('vehiculo')
+        try:
+            vehiculo_instance = Vehiculo.objects.get(Placa=vehiculo_str)
+        except ObjectDoesNotExist:
+            self.add_error('vehiculo', "El vehículo con placa {} no existe.".format(vehiculo_str))
+            return None
+        return vehiculo_instance
 
 class InspeccionForm(forms.ModelForm):
     class Meta:

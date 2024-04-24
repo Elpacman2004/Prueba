@@ -1,0 +1,71 @@
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    color: #fff;
+}
+
+input[type="text"],
+.form-check-input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
+}
+
+label {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    position: relative !important;
+}
+
+.btn-primary:hover {
+    background-color: #fff;
+    color: #4CAF50; 
+}
+
+.Error {
+    color: rgb(204, 0, 0);
+}
+
+.tt-menu {
+    z-index: 1000;
+    position: absolute;
+    width: 100%;
+    top: 100%;
+    left: 0;
+    background-color: #333;
+    border-radius: 5px;
+}
+
+#id_vehiculo {
+    position: relative; /* Permite que el menú desplegable se posicione en relación con este elemento */
+}
+
+.dropdown-imput {
+    display: inline-block;
+    position: relative;
+}
+
+button[type="submit"] {
+    display: block;
+    position: relative;
+}

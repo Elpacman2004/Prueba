@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Inspección</title>
-    <link rel="stylesheet" href={% static "Styles/FormI.css" %}>
+    <link rel="stylesheet" href={% static "Styles/Form.css" %}>
 </head>
 <style> 
     body {
@@ -36,29 +36,28 @@
                             {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_gasometro' %}
                                 <div class ='radio-group' data-group-name="{{ field.label }}">
                                     <ul>
-                                        <li>
-                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="C">
-                                            <label class="form-check-label" for="{{ field.auto_id }}">Cumple</label>
-                                        </li>
-                                            
-                                        <li>
-                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="NC">
-                                            <label class="form-check-label" for="{{ field.auto_id }}">No cumple</label>
-                                        </li>
-                                        
-                                        <li>
-                                            <div id="fotoInput_id_Nivel_aceite" style="display: none;">
-                                                <label for="{{ field.auto_id }}_NC">Subir Imagen:</label>
-                                                <input type="file" id="{{ field.auto_id }}_NC" name="{{ field.html_name }}_NC" accept="image/*">
-                                            </div>
-                                        </li>
-
-                                        <li>
-                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="NA">
-                                            <label class="form-check-label" for="{{ field.auto_id }}">No Aplica</label>
-                                        </li>
+                                        <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="C">
+                                        <label class="form-check-label" for="{{ field.auto_id }}">Cumple</label>
                                     </ul>
-                                </div>
+                                            
+                                    <ul>
+                                        <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="NC">
+                                        <label class="form-check-label" for="{{ field.auto_id }}">No cumple</label>
+                                    </ul>
+                                        
+                                    <ul>
+                                        <div id="fotoInput_id_Nivel_aceite" style="display: none;">
+                                            <label for="{{ field.auto_id }}_NC">Subir Imagen:</label>
+                                            <input type="file" id="{{ field.auto_id }}_NC" name="{{ field.html_name }}_NC" accept="image/*">
+                                        </div>
+                                    </ul>
+
+                                    <ul>
+                                        <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="NA">
+                                        <label class="form-check-label" for="{{ field.auto_id }}">No Aplica</label>
+                                    </ul>
+                                </ul>
+                            </div>
                             {% endif %} 
             {% endfor %}
 

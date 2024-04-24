@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Inspección</title>
-    <link rel="stylesheet" href="{% static "Styles/FormI.css" %}">
+    <link rel="stylesheet" href="{% static "Styles/G.css" %}">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
 </head>
 <style> 
     body {
@@ -24,15 +27,45 @@
         <h2>Formulario de Inspección del costado</h2>
         <form method="POST">
             <div class='Error'>
-                {{Error}}
-            </div>
+                {{ Error }}
+            </div> 
             {% csrf_token %}
-            {{form}}
-
+            {{ form.as_p }}
             
+            <div class="dropdown-container">
+                
+            </div>
+
             <button type="submit" class="btn btn-primary">Enviar</button>
+
         </form>
     </div>
 
+   
+
+     <script>
+    $(document).ready(function() {
+        document.getElementById('id_vehiculo').classList.add('dropdown-input');
+        var vehiculos = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.whitespace,
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                url: "{% url 'Search' %}?q=%QUERY",
+                wildcard: '%QUERY'
+            }
+        });
+    
+        $('#id_vehiculo').typeahead(null, {
+            source: vehiculos
+        }).on('typeahead:render', function() {
+            // Mueve el menú desplegable debajo del campo de entrada después de que se haya generado
+            $('.tt-menu').insertAfter('#id_vehiculo');
+        });
+    });
+     </script>
+
 </body>
+
+
+
 </html>

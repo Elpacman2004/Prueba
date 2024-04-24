@@ -6,6 +6,14 @@ class Vehiculo(models.Model):
 
     def __str__(self):
         return f"Vehículo {self.Placa}"
+    
+class Histoial_archivos(models.Model):
+    vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE)
+    Nombre_archivo = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Archivo del vehículo {self.vehiculo.Placa}"
 
 class Datos_generales(models.Model):
     vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE)

@@ -1,17 +1,28 @@
 from django .shortcuts import render, redirect
 from .froms import DatosGeneralesForm, InspeccionForm, FrontPartForm, SideForm, BackPartForm
-from .models import Datos_generales, Inspeccion, Vehiculo
+from .models import Datos_generales, Inspeccion, Vehiculo, Histoial_archivos
 from builtins import ValueError
 from openpyxl import Workbook, load_workbook
 from django.http import HttpResponse
 from datetime import datetime
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import JsonResponse
+import shutil
+from django.utils import timezone
+
 
 hoy = datetime.now()
 
 dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 dia_semana = dias_semana[hoy.weekday()]
+date_str = datetime.now().strftime('%Y-%m-%d')
+
+
+def Search(request):
+    q = request.GET.get('q', '')
+    vehiculos = Vehiculo.objects.filter(Placa__icontains=q)
+    results = [vehiculo.Placa for vehiculo in vehiculos]
+    return JsonResponse(results, safe=False)
 
 def index(request):
     return render(request, 'Index.html')
@@ -20,39 +31,92 @@ def FormG (request):
     if request.method == 'POST':
         print (request.POST)
         
-        Form = DatosGeneralesForm(request.POST, request.FILES)
-        if Form.is_valid():
-            General_Data = Form.cleaned_data
+        form = DatosGeneralesForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            General_Data = form.cleaned_data
             print (General_Data)
-            wb = load_workbook(filename= 'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')
+            
+            historial_archivos = Histoial_archivos.objects.filter(vehiculo=General_Data['vehiculo'])
+            if historial_archivos.exists():
+                ultimo_archivo = historial_archivos.latest('created_at')
+                
+                now = timezone.now()
+                days_passed = (now - ultimo_archivo.created_at).days
+                if days_passed == 7 or 14 or 21:
+                    wb = load_workbook(filename= nombre_archivo)
+                    if days_passed ==7:
+                        ws = wb.create_sheet("Semana 2")
+                    elif days_passed == 14:
+                        ws = wb.create_sheet("Semana 3")
+                    elif days_passed == 21:
+                        ws = wb.create_sheet("Semana 4")
+                elif days_passed == 30:
+                    new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
+                    shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
+                    Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
+                    Historial.save()
+                    wb = load_workbook(filename= new_file_name)
+                    request.session['nombre_archivo'] = new_file_name
+                else:
+                    nombre_archivo = ultimo_archivo.Nombre_archivo
+                    wb = load_workbook(filename= nombre_archivo)
+                    request.session['nombre_archivo'] = nombre_archivo
+            else:               
+                new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
+                shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
+                Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
+                Historial.save()
+                wb = load_workbook(filename= new_file_name)
+                request.session['nombre_archivo'] = new_file_name
+                
             sheet = wb['MySheet']
-            sheet['Y1'] = General_Data['Fecha']
             sheet['E5'] = str(General_Data['vehiculo'])
             sheet['U5'] = General_Data['Proyecto']
-            sheet['G39'] = General_Data['Nombre']
+            if dia_semana == 'Lunes':
+                sheet['G39'] = General_Data['Nombre']
+                sheet['G40'] = General_Data['Fecha']
+            elif dia_semana == 'Martes':
+                sheet['J39'] = General_Data['Nombre']
+                sheet['J40'] = General_Data['Fecha']
+            elif dia_semana == 'Miércoles':
+                sheet['M39'] = General_Data['Nombre']
+                sheet['M40'] = General_Data['Fecha']
+            elif dia_semana == 'Jueves':
+                sheet['P39'] = General_Data['Nombre']
+                sheet['P40'] = General_Data['Fecha']
+            elif dia_semana == 'Viernes':
+                sheet['S39'] = General_Data['Nombre']
+                sheet['S40'] = General_Data['Fecha']
+            elif dia_semana == 'Sábado':
+                sheet['V39'] = General_Data['Nombre']
+                sheet['V40'] = General_Data['Fecha']
+            else:
+                sheet['Y39'] = General_Data['Nombre']
+                sheet['Y40'] = General_Data['Fecha']
             
-            wb.save('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')
-            Form.save()
+            wb.save(filename= request.session.get('nombre_archivo'))
             return redirect('FormI')
+        else:
+            if 'vehiculo' in form.errors:
+                Error = 'El vehículo con placa {} no existe.'.format(form.data['vehiculo'])
+                print(form.errors['vehiculo'])
+            return render(request, 'Forms/FormG.html', {'form': form,
+                                                        'Error': Error
+                                                        })
     else:
-        if 'term' in request.GET:
-            qs = Vehiculo.objects.filter(Placa__icontains=request.GET.get('term'))
-            print('Query:', qs.query)  # Imprime la consulta
-            titles = list(qs.values_list('Placa', flat=True))
-            print('Results:', titles)  # Imprime los resultados
-            return JsonResponse(titles, safe=False)
         form = DatosGeneralesForm() 
         return render(request, 'Forms/FormG.html', {'form': form})
 
 def FormI(request):
     if request.method == 'POST':
         form = InspeccionForm(request.POST, request.FILES)
-        print(request.POST)
-        
+        print(request.POST) 
         if form.is_valid():
+            nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
             print(inspeccion)
-            wb = load_workbook(filename='C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')
+            wb = load_workbook(filename= nombre_archivo)
             N=9
             
             if dia_semana == 'Lunes':
@@ -136,7 +200,7 @@ def FormI(request):
                             N+=1         
             elif dia_semana == 'Miércoles':
                 for field, value in form.cleaned_data.items():
-                    if value == 'M':
+                    if value == 'C':
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
@@ -330,7 +394,7 @@ def FormI(request):
                             sheet['Y'+str(N)] = value
                             N+=1
                    
-            wb.save('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')                   
+            wb.save(nombre_archivo)                   
                 
             form.save()
             return redirect ('FormFP')
@@ -356,9 +420,10 @@ def FormFP(request):
         print(request.POST)
         
         if form.is_valid():
+            nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
             print(inspeccion)
-            wb = load_workbook(filename='C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')
+            wb = load_workbook(filename= nombre_archivo)
             N=25
             
             if dia_semana == 'Lunes':
@@ -442,7 +507,7 @@ def FormFP(request):
                             N+=1         
             elif dia_semana == 'Miércoles':
                 for field, value in form.cleaned_data.items():
-                    if value == 'M':
+                    if value == 'C':
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
@@ -636,7 +701,7 @@ def FormFP(request):
                             sheet['Y'+str(N)] = value
                             N+=1
                    
-            wb.save('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')                   
+            wb.save(nombre_archivo)                   
                 
             form.save()
             return redirect ('FormS')
@@ -652,7 +717,7 @@ def FormFP(request):
     else:
         Titulo = 'Formulario de Inspección de la parte delantera.'
         form = FrontPartForm()
-        return render(request, 'Forms/Formpruebas.html', {'form': form,
+        return render(request, 'Forms/Form.html', {'form': form,
                                                           'Title': Titulo
                                                           })
 
@@ -662,9 +727,10 @@ def FormS (request):
         print(request.POST)
         
         if form.is_valid():
+            nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
             print(inspeccion)
-            wb = load_workbook(filename='C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')
+            wb = load_workbook(filename= nombre_archivo)
             N=29
             
             if dia_semana == 'Lunes':
@@ -748,7 +814,7 @@ def FormS (request):
                             N+=1         
             elif dia_semana == 'Miércoles':
                 for field, value in form.cleaned_data.items():
-                    if value == 'M':
+                    if value == 'C':
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
@@ -942,12 +1008,12 @@ def FormS (request):
                             sheet['Y'+str(N)] = value
                             N+=1
                    
-            wb.save('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')                   
+            wb.save(nombre_archivo)                   
                 
             form.save()
             return redirect ('FormBP')
         else:
-            Titulo = 'Formulario de Inspección de la parte trasera.'
+            Titulo = 'Formulario de inspección de la parte del costado.'
             error = 'Tienes que llenar todos los campos para continuar con el formulario.'
             form = SideForm(request.POST, request.FILES)
             return render(request, 'Forms/Form.html', {'form': form, 
@@ -956,7 +1022,7 @@ def FormS (request):
                                                               })
                 
     else:
-        Titulo = 'Formulario de Inspección de la parte delantera.'
+        Titulo = 'Formulario de inspección de la parte del costado.'
         form = SideForm()
         return render(request, 'Forms/Form.html', {'form': form,
                                                           'Title': Titulo
@@ -968,9 +1034,10 @@ def FormBP(request):
         print(request.POST)
         
         if form.is_valid():
+            nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
             print(inspeccion)
-            wb = load_workbook(filename='C:/Users/Dagelec LTDA/Desktop/Pruebas_exce/Documento_prueba.xlsx')
+            wb = load_workbook(filename= nombre_archivo)
             N=34
             
             if dia_semana == 'Lunes':
@@ -1051,10 +1118,10 @@ def FormBP(request):
                         else:
                             sheet = wb['MySheet']
                             sheet['J'+str(N)] = value
-                            N+=1         
+                            N+=1
             elif dia_semana == 'Miércoles':
                 for field, value in form.cleaned_data.items():
-                    if value == 'M':
+                    if value == 'C':
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
@@ -1248,7 +1315,7 @@ def FormBP(request):
                             sheet['Y'+str(N)] = value
                             N+=1
                    
-            wb.save('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Documento_prueba.xlsx')                   
+            wb.save(nombre_archivo)                   
                 
             form.save()
             return redirect ('Index')
