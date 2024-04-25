@@ -9,6 +9,9 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import JsonResponse
 import shutil
 from django.utils import timezone
+import os
+import pandas as pd
+import string
 
 
 hoy = datetime.now()
@@ -16,6 +19,7 @@ hoy = datetime.now()
 dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 dia_semana = dias_semana[hoy.weekday()]
 date_str = datetime.now().strftime('%Y-%m-%d')
+hora = hoy.hour
 
 
 def Search(request):
@@ -40,9 +44,16 @@ def FormG (request):
             historial_archivos = Histoial_archivos.objects.filter(vehiculo=General_Data['vehiculo'])
             if historial_archivos.exists():
                 ultimo_archivo = historial_archivos.latest('created_at')
+                nombre_archivo = ultimo_archivo.Nombre_archivo
+                
+                shutil.copy(nombre_archivo, f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/Copy.xlsx")
                 
                 now = timezone.now()
                 days_passed = (now - ultimo_archivo.created_at).days
+                
+                wb = load_workbook(filename= nombre_archivo)
+                request.session['Ruta'] = str(General_Data['vehiculo'])
+                request.session['nombre_archivo'] = nombre_archivo
                 if days_passed == 7 or 14 or 21:
                     wb = load_workbook(filename= nombre_archivo)
                     if days_passed ==7:
@@ -51,49 +62,97 @@ def FormG (request):
                         ws = wb.create_sheet("Semana 3")
                     elif days_passed == 21:
                         ws = wb.create_sheet("Semana 4")
+                        
                 elif days_passed == 30:
-                    new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
+                    new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
                     shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
                     Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
                     Historial.save()
                     wb = load_workbook(filename= new_file_name)
                     request.session['nombre_archivo'] = new_file_name
-                else:
-                    nombre_archivo = ultimo_archivo.Nombre_archivo
-                    wb = load_workbook(filename= nombre_archivo)
-                    request.session['nombre_archivo'] = nombre_archivo
-            else:               
-                new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
+                    
+            else:
+                folder_path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}"
+                os.makedirs(folder_path, exist_ok=True)
+                new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
                 shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
                 Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
                 Historial.save()
                 wb = load_workbook(filename= new_file_name)
                 request.session['nombre_archivo'] = new_file_name
                 
-            sheet = wb['MySheet']
+            if days_passed >= 21:
+                Semana = "Semana 4"
+                request.session['Sheet'] = Semana
+            elif days_passed >= 14: 
+                Semana = "Semana 3"
+                request.session['Sheet'] = Semana
+            elif days_passed >= 7:
+                Semana = "Semana 2"
+                request.session['Sheet'] = Semana
+            else:
+                Semana = "Semana 1"
+                request.session['Sheet'] = Semana
+                
+            sheet = wb[Semana]
             sheet['E5'] = str(General_Data['vehiculo'])
             sheet['U5'] = General_Data['Proyecto']
             if dia_semana == 'Lunes':
-                sheet['G39'] = General_Data['Nombre']
-                sheet['G40'] = General_Data['Fecha']
+                if hora >= 6 and hora < 14:
+                    sheet['G39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['G40'] = General_Data['Nombre'] 
+                else:
+                    sheet['G41'] = General_Data['Nombre']      
+                sheet['G42'] = General_Data['Fecha']
             elif dia_semana == 'Martes':
-                sheet['J39'] = General_Data['Nombre']
-                sheet['J40'] = General_Data['Fecha']
+                if hora >= 6 and hora < 14:
+                    sheet['J39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['J40'] = General_Data['Nombre'] 
+                else:
+                    sheet['J41'] = General_Data['Nombre']   
+                sheet['J42'] = General_Data['Fecha']
             elif dia_semana == 'Miércoles':
-                sheet['M39'] = General_Data['Nombre']
-                sheet['M40'] = General_Data['Fecha']
+                if hora >= 6 and hora < 14:
+                    sheet['M39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['M40'] = General_Data['Nombre'] 
+                else:
+                    sheet['M41'] = General_Data['Nombre']   
+                sheet['M42'] = General_Data['Fecha']
             elif dia_semana == 'Jueves':
-                sheet['P39'] = General_Data['Nombre']
-                sheet['P40'] = General_Data['Fecha']
+                if hora >= 6 and hora < 14:
+                    sheet['P39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['P40'] = General_Data['Nombre'] 
+                else:
+                    sheet['P41'] = General_Data['Nombre']   
+                sheet['P42'] = General_Data['Fecha']
             elif dia_semana == 'Viernes':
-                sheet['S39'] = General_Data['Nombre']
-                sheet['S40'] = General_Data['Fecha']
+                if hora >= 6 and hora < 14:
+                    sheet['S39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['S40'] = General_Data['Nombre'] 
+                else:
+                    sheet['S41'] = General_Data['Nombre']   
+                sheet['S42'] = General_Data['Fecha']
             elif dia_semana == 'Sábado':
-                sheet['V39'] = General_Data['Nombre']
-                sheet['V40'] = General_Data['Fecha']
+                if hora >= 6 and hora < 14:
+                    sheet['V39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['V40'] = General_Data['Nombre'] 
+                else:
+                    sheet['V41'] = General_Data['Nombre']   
+                sheet['V42'] = General_Data['Fecha']
             else:
-                sheet['Y39'] = General_Data['Nombre']
-                sheet['Y40'] = General_Data['Fecha']
+                if hora >= 6 and hora < 14:
+                    sheet['Y39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['Y40'] = General_Data['Nombre'] 
+                else:
+                    sheet['Y41'] = General_Data['Nombre']   
+                sheet['Y42'] = General_Data['Fecha']
             
             wb.save(filename= request.session.get('nombre_archivo'))
             return redirect('FormI')
@@ -113,10 +172,15 @@ def FormI(request):
         form = InspeccionForm(request.POST, request.FILES)
         print(request.POST) 
         if form.is_valid():
+            Sheet = request.session.get('Sheet', None)
+            if Sheet is None:
+                return redirect('FormG')
+            
             nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
             print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
+            sheet = wb[Sheet]
             N=9
             
             if dia_semana == 'Lunes':
@@ -126,8 +190,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
                             sheet['G'+str(N)] = value
                             sheet['H'+str(N)] = 'x'
                             sheet['I'+str(N)] = 'x'
@@ -136,8 +199,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['H'+str(N)] = value
                             sheet['I'+str(N)] = 'x'
                             sheet['G'+str(N)] = 'x'
@@ -146,8 +209,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['I'+str(N)] = value
                             sheet['G'+str(N)] = 'x'
                             sheet['H'+str(N)] = 'x'
@@ -156,7 +219,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['G'+str(N)] = value
                             N+=1
             elif dia_semana == 'Martes':
@@ -165,8 +228,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['J'+str(N)] = value
                             sheet['K'+str(N)] = 'x'
                             sheet['L'+str(N)] = 'x'
@@ -175,8 +238,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['K'+str(N)] = value
                             sheet['L'+str(N)] = 'x'
                             sheet['J'+str(N)] = 'x'
@@ -185,8 +248,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['L'+str(N)] = value
                             sheet['J'+str(N)] = 'x'
                             sheet['K'+str(N)] = 'x'
@@ -195,7 +258,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['J'+str(N)] = value
                             N+=1         
             elif dia_semana == 'Miércoles':
@@ -204,8 +267,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['M'+str(N)] = value
                             sheet['N'+str(N)] = 'x'
                             sheet['O'+str(N)] = 'x'
@@ -214,8 +277,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['N'+str(N)] = value
                             sheet['O'+str(N)] = 'x'
                             sheet['M'+str(N)] = 'x'
@@ -224,8 +287,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['O'+str(N)] = value
                             sheet['M'+str(N)] = 'x'
                             sheet['N'+str(N)] = 'x'
@@ -234,7 +297,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['M'+str(N)] = value
                             N+=1
             elif dia_semana == 'Jueves':
@@ -243,8 +306,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
                             sheet['P'+str(N)] = value
                             sheet['Q'+str(N)] = 'x'
                             sheet['R'+str(N)] = 'x'
@@ -253,8 +315,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
                             sheet['Q'+str(N)] = value
                             sheet['R'+str(N)] = 'x'
                             sheet['P'+str(N)] = 'x'
@@ -263,8 +324,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
                             sheet['R'+str(N)] = value
                             sheet['P'+str(N)] = 'x'
                             sheet['Q'+str(N)] = 'x'
@@ -273,7 +333,6 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
                             sheet['P'+str(N)] = value
                             N+=1
             elif dia_semana == 'Viernes':
@@ -282,8 +341,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['S'+str(N)] = value
                             sheet['T'+str(N)] = 'x'
                             sheet['U'+str(N)] = 'x'
@@ -292,8 +351,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['T'+str(N)] = value
                             sheet['U'+str(N)] = 'x'
                             sheet['S'+str(N)] = 'x'
@@ -302,8 +361,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['U'+str(N)] = value
                             sheet['S'+str(N)] = 'x'
                             sheet['T'+str(N)] = 'x'
@@ -312,7 +371,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['S'+str(N)] = value
                             N+=1
             elif dia_semana == 'Sábado':
@@ -321,8 +380,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['V'+str(N)] = value
                             sheet['W'+str(N)] = 'x'
                             sheet['X'+str(N)] = 'x'
@@ -331,8 +390,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['W'+str(N)] = value
                             sheet['X'+str(N)] = 'x'
                             sheet['V'+str(N)] = 'x'
@@ -341,8 +400,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['X'+str(N)] = value
                             sheet['V'+str(N)] = 'x'
                             sheet['W'+str(N)] = 'x'
@@ -351,7 +410,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['V'+str(N)] = value
                             N+=1
             elif dia_semana == 'Domingo':
@@ -360,8 +419,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Y'+str(N)] = value
                             sheet['Z'+str(N)] = 'x'
                             sheet['AA'+str(N)] = 'x'
@@ -370,8 +429,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Z'+str(N)] = value
                             sheet['AA'+str(N)] = 'x'
                             sheet['Y'+str(N)] = 'x'
@@ -380,8 +439,8 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['AA'+str(N)] = value
                             sheet['Y'+str(N)] = 'x'
                             sheet['Z'+str(N)] = 'x'
@@ -390,7 +449,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['Y'+str(N)] = value
                             N+=1
                    
@@ -420,10 +479,14 @@ def FormFP(request):
         print(request.POST)
         
         if form.is_valid():
+            Sheet = request.session.get('Sheet', None)
+            if Sheet is None:
+                return redirect('FormG')
             nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
             print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
+            sheet = wb[Sheet]
             N=25
             
             if dia_semana == 'Lunes':
@@ -433,8 +496,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['G'+str(N)] = value
                             sheet['H'+str(N)] = 'x'
                             sheet['I'+str(N)] = 'x'
@@ -443,8 +506,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['H'+str(N)] = value
                             sheet['I'+str(N)] = 'x'
                             sheet['G'+str(N)] = 'x'
@@ -453,8 +516,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['I'+str(N)] = value
                             sheet['G'+str(N)] = 'x'
                             sheet['H'+str(N)] = 'x'
@@ -463,7 +526,7 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['G'+str(N)] = value
                             N+=1
             elif dia_semana == 'Martes':
@@ -472,8 +535,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['J'+str(N)] = value
                             sheet['K'+str(N)] = 'x'
                             sheet['L'+str(N)] = 'x'
@@ -482,8 +545,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['K'+str(N)] = value
                             sheet['L'+str(N)] = 'x'
                             sheet['J'+str(N)] = 'x'
@@ -492,8 +555,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['L'+str(N)] = value
                             sheet['J'+str(N)] = 'x'
                             sheet['K'+str(N)] = 'x'
@@ -502,7 +565,7 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['J'+str(N)] = value
                             N+=1         
             elif dia_semana == 'Miércoles':
@@ -511,8 +574,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['M'+str(N)] = value
                             sheet['N'+str(N)] = 'x'
                             sheet['O'+str(N)] = 'x'
@@ -521,8 +584,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['N'+str(N)] = value
                             sheet['O'+str(N)] = 'x'
                             sheet['M'+str(N)] = 'x'
@@ -531,8 +594,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['O'+str(N)] = value
                             sheet['M'+str(N)] = 'x'
                             sheet['N'+str(N)] = 'x'
@@ -541,7 +604,7 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['M'+str(N)] = value
                             N+=1
             elif dia_semana == 'Jueves':
@@ -550,8 +613,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['P'+str(N)] = value
                             sheet['Q'+str(N)] = 'x'
                             sheet['R'+str(N)] = 'x'
@@ -560,8 +623,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Q'+str(N)] = value
                             sheet['R'+str(N)] = 'x'
                             sheet['P'+str(N)] = 'x'
@@ -570,8 +633,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['R'+str(N)] = value
                             sheet['P'+str(N)] = 'x'
                             sheet['Q'+str(N)] = 'x'
@@ -580,7 +643,7 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['P'+str(N)] = value
                             N+=1
             elif dia_semana == 'Viernes':
@@ -589,8 +652,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['S'+str(N)] = value
                             sheet['T'+str(N)] = 'x'
                             sheet['U'+str(N)] = 'x'
@@ -599,8 +662,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['T'+str(N)] = value
                             sheet['U'+str(N)] = 'x'
                             sheet['S'+str(N)] = 'x'
@@ -609,8 +672,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['U'+str(N)] = value
                             sheet['S'+str(N)] = 'x'
                             sheet['T'+str(N)] = 'x'
@@ -619,7 +682,7 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['S'+str(N)] = value
                             N+=1
             elif dia_semana == 'Sábado':
@@ -628,8 +691,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['V'+str(N)] = value
                             sheet['W'+str(N)] = 'x'
                             sheet['X'+str(N)] = 'x'
@@ -638,8 +701,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['W'+str(N)] = value
                             sheet['X'+str(N)] = 'x'
                             sheet['V'+str(N)] = 'x'
@@ -648,8 +711,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['X'+str(N)] = value
                             sheet['V'+str(N)] = 'x'
                             sheet['W'+str(N)] = 'x'
@@ -658,7 +721,7 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['V'+str(N)] = value
                             N+=1
             elif dia_semana == 'Domingo':
@@ -667,8 +730,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Y'+str(N)] = value
                             sheet['Z'+str(N)] = 'x'
                             sheet['AA'+str(N)] = 'x'
@@ -677,8 +740,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Z'+str(N)] = value
                             sheet['AA'+str(N)] = 'x'
                             sheet['Y'+str(N)] = 'x'
@@ -687,8 +750,8 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['AA'+str(N)] = value
                             sheet['Y'+str(N)] = 'x'
                             sheet['Z'+str(N)] = 'x'
@@ -697,7 +760,7 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['Y'+str(N)] = value
                             N+=1
                    
@@ -727,10 +790,14 @@ def FormS (request):
         print(request.POST)
         
         if form.is_valid():
+            Sheet = request.session.get('Sheet', None)
+            if Sheet is None:
+                return redirect('FormG')
             nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
             print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
+            sheet = wb[Sheet]
             N=29
             
             if dia_semana == 'Lunes':
@@ -740,8 +807,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['G'+str(N)] = value
                             sheet['H'+str(N)] = 'x'
                             sheet['I'+str(N)] = 'x'
@@ -750,8 +817,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['H'+str(N)] = value
                             sheet['I'+str(N)] = 'x'
                             sheet['G'+str(N)] = 'x'
@@ -760,8 +827,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['I'+str(N)] = value
                             sheet['G'+str(N)] = 'x'
                             sheet['H'+str(N)] = 'x'
@@ -770,7 +837,7 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['G'+str(N)] = value
                             N+=1
             elif dia_semana == 'Martes':
@@ -779,8 +846,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['J'+str(N)] = value
                             sheet['K'+str(N)] = 'x'
                             sheet['L'+str(N)] = 'x'
@@ -789,8 +856,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['K'+str(N)] = value
                             sheet['L'+str(N)] = 'x'
                             sheet['J'+str(N)] = 'x'
@@ -799,8 +866,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['L'+str(N)] = value
                             sheet['J'+str(N)] = 'x'
                             sheet['K'+str(N)] = 'x'
@@ -809,7 +876,7 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['J'+str(N)] = value
                             N+=1         
             elif dia_semana == 'Miércoles':
@@ -818,8 +885,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['M'+str(N)] = value
                             sheet['N'+str(N)] = 'x'
                             sheet['O'+str(N)] = 'x'
@@ -828,8 +895,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['N'+str(N)] = value
                             sheet['O'+str(N)] = 'x'
                             sheet['M'+str(N)] = 'x'
@@ -838,8 +905,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['O'+str(N)] = value
                             sheet['M'+str(N)] = 'x'
                             sheet['N'+str(N)] = 'x'
@@ -848,7 +915,7 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['M'+str(N)] = value
                             N+=1
             elif dia_semana == 'Jueves':
@@ -857,8 +924,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['P'+str(N)] = value
                             sheet['Q'+str(N)] = 'x'
                             sheet['R'+str(N)] = 'x'
@@ -867,8 +934,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Q'+str(N)] = value
                             sheet['R'+str(N)] = 'x'
                             sheet['P'+str(N)] = 'x'
@@ -877,8 +944,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['R'+str(N)] = value
                             sheet['P'+str(N)] = 'x'
                             sheet['Q'+str(N)] = 'x'
@@ -887,7 +954,7 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['P'+str(N)] = value
                             N+=1
             elif dia_semana == 'Viernes':
@@ -896,8 +963,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['S'+str(N)] = value
                             sheet['T'+str(N)] = 'x'
                             sheet['U'+str(N)] = 'x'
@@ -906,8 +973,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['T'+str(N)] = value
                             sheet['U'+str(N)] = 'x'
                             sheet['S'+str(N)] = 'x'
@@ -916,8 +983,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['U'+str(N)] = value
                             sheet['S'+str(N)] = 'x'
                             sheet['T'+str(N)] = 'x'
@@ -926,7 +993,7 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['S'+str(N)] = value
                             N+=1
             elif dia_semana == 'Sábado':
@@ -935,8 +1002,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['V'+str(N)] = value
                             sheet['W'+str(N)] = 'x'
                             sheet['X'+str(N)] = 'x'
@@ -945,8 +1012,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['W'+str(N)] = value
                             sheet['X'+str(N)] = 'x'
                             sheet['V'+str(N)] = 'x'
@@ -955,8 +1022,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['X'+str(N)] = value
                             sheet['V'+str(N)] = 'x'
                             sheet['W'+str(N)] = 'x'
@@ -965,7 +1032,7 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['V'+str(N)] = value
                             N+=1
             elif dia_semana == 'Domingo':
@@ -974,8 +1041,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Y'+str(N)] = value
                             sheet['Z'+str(N)] = 'x'
                             sheet['AA'+str(N)] = 'x'
@@ -984,8 +1051,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Z'+str(N)] = value
                             sheet['AA'+str(N)] = 'x'
                             sheet['Y'+str(N)] = 'x'
@@ -994,8 +1061,8 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['AA'+str(N)] = value
                             sheet['Y'+str(N)] = 'x'
                             sheet['Z'+str(N)] = 'x'
@@ -1004,7 +1071,7 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['Y'+str(N)] = value
                             N+=1
                    
@@ -1027,6 +1094,13 @@ def FormS (request):
         return render(request, 'Forms/Form.html', {'form': form,
                                                           'Title': Titulo
                                                           })
+        
+def generate_columns(start, end):
+    letters = list(string.ascii_uppercase)
+    columns = letters[letters.index(start):]
+    if end in letters:
+        columns += [f'A{letter}' for letter in letters[:letters.index(end)+1]]
+    return columns
 
 def FormBP(request):
     if request.method == 'POST':
@@ -1034,11 +1108,18 @@ def FormBP(request):
         print(request.POST)
         
         if form.is_valid():
+            Sheet = request.session.get('Sheet', None)
+            if Sheet is None:
+                return redirect('FormG')
+            Ruta = request.session.get('Ruta')
             nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
             print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
+            sheet = wb[Sheet]
             N=34
+            
+            columnas = ['LUNESC', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA']
             
             if dia_semana == 'Lunes':
                 
@@ -1047,8 +1128,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['G'+str(N)] = value
                             sheet['H'+str(N)] = 'x'
                             sheet['I'+str(N)] = 'x'
@@ -1057,8 +1138,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['H'+str(N)] = value
                             sheet['I'+str(N)] = 'x'
                             sheet['G'+str(N)] = 'x'
@@ -1067,8 +1148,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['I'+str(N)] = value
                             sheet['G'+str(N)] = 'x'
                             sheet['H'+str(N)] = 'x'
@@ -1077,7 +1158,7 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['G'+str(N)] = value
                             N+=1
             elif dia_semana == 'Martes':
@@ -1086,8 +1167,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['J'+str(N)] = value
                             sheet['K'+str(N)] = 'x'
                             sheet['L'+str(N)] = 'x'
@@ -1096,8 +1177,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['K'+str(N)] = value
                             sheet['L'+str(N)] = 'x'
                             sheet['J'+str(N)] = 'x'
@@ -1106,8 +1187,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['L'+str(N)] = value
                             sheet['J'+str(N)] = 'x'
                             sheet['K'+str(N)] = 'x'
@@ -1116,7 +1197,7 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['J'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['J'+str(N)] = value
                             N+=1
             elif dia_semana == 'Miércoles':
@@ -1125,8 +1206,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['M'+str(N)] = value
                             sheet['N'+str(N)] = 'x'
                             sheet['O'+str(N)] = 'x'
@@ -1135,8 +1216,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['N'+str(N)] = value
                             sheet['O'+str(N)] = 'x'
                             sheet['M'+str(N)] = 'x'
@@ -1145,8 +1226,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['O'+str(N)] = value
                             sheet['M'+str(N)] = 'x'
                             sheet['N'+str(N)] = 'x'
@@ -1155,7 +1236,7 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['M'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['M'+str(N)] = value
                             N+=1
             elif dia_semana == 'Jueves':
@@ -1164,8 +1245,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['P'+str(N)] = value
                             sheet['Q'+str(N)] = 'x'
                             sheet['R'+str(N)] = 'x'
@@ -1174,8 +1255,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Q'+str(N)] = value
                             sheet['R'+str(N)] = 'x'
                             sheet['P'+str(N)] = 'x'
@@ -1184,8 +1265,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['R'+str(N)] = value
                             sheet['P'+str(N)] = 'x'
                             sheet['Q'+str(N)] = 'x'
@@ -1194,7 +1275,7 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['P'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['P'+str(N)] = value
                             N+=1
             elif dia_semana == 'Viernes':
@@ -1203,8 +1284,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['S'+str(N)] = value
                             sheet['T'+str(N)] = 'x'
                             sheet['U'+str(N)] = 'x'
@@ -1213,8 +1294,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['T'+str(N)] = value
                             sheet['U'+str(N)] = 'x'
                             sheet['S'+str(N)] = 'x'
@@ -1223,8 +1304,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['U'+str(N)] = value
                             sheet['S'+str(N)] = 'x'
                             sheet['T'+str(N)] = 'x'
@@ -1233,7 +1314,7 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['S'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['S'+str(N)] = value
                             N+=1
             elif dia_semana == 'Sábado':
@@ -1242,8 +1323,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['V'+str(N)] = value
                             sheet['W'+str(N)] = 'x'
                             sheet['X'+str(N)] = 'x'
@@ -1252,8 +1333,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['W'+str(N)] = value
                             sheet['X'+str(N)] = 'x'
                             sheet['V'+str(N)] = 'x'
@@ -1262,8 +1343,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['X'+str(N)] = value
                             sheet['V'+str(N)] = 'x'
                             sheet['W'+str(N)] = 'x'
@@ -1272,7 +1353,7 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['V'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['V'+str(N)] = value
                             N+=1
             elif dia_semana == 'Domingo':
@@ -1281,8 +1362,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Y'+str(N)] = value
                             sheet['Z'+str(N)] = 'x'
                             sheet['AA'+str(N)] = 'x'
@@ -1291,8 +1372,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['Z'+str(N)] = value
                             sheet['AA'+str(N)] = 'x'
                             sheet['Y'+str(N)] = 'x'
@@ -1301,8 +1382,8 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            print (f'{field} - {value}')
-                            sheet = wb['MySheet']
+                            
+                            
                             sheet['AA'+str(N)] = value
                             sheet['Y'+str(N)] = 'x'
                             sheet['Z'+str(N)] = 'x'
@@ -1311,13 +1392,42 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['Y'+str(N)] = value.name
                         else:
-                            sheet = wb['MySheet']
+                            
                             sheet['Y'+str(N)] = value
                             N+=1
-                   
-            wb.save(nombre_archivo)                   
+            
+            try:
+                df_original = pd.read_excel(f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{Ruta}/Copy.xlsx')
+                df_curr = pd.read_excel(nombre_archivo) 
+
+                pd.set_option('display.max_columns', None)
+                pd.set_option('display.max_rows', None)
+
+                print(df_curr)
+                print(df_original)
+                      
+                for col in columnas:
+                    if col in df_original.columns:
+                        print(f'La columna {col} existe en el DataFrame.')
+                    else:
+                        print(f'La columna {col} no existe en el DataFrame.')
+                        df = pd.read_csv('data.csv')
+                        print(df)
+                df_original_selected = df_original.loc[columnas]
+                df_curr_selected = df_curr.loc[columnas]
+                df_changes = df_curr_selected != df_original_selected
                 
-            form.save()
+                df_changes['Combined'] = df_changes.apply(lambda row: ', '.join([f'{col}: {df_curr.loc[row.name, col]}' for col in columnas if row[col]]), axis=1)
+                
+                
+                with pd.ExcelWriter(nombre_archivo, mode='a') as writer:
+                    df_changes.to_excel(writer, sheet_name='Changes')
+                
+                wb.save(nombre_archivo)                      
+                form.save()
+            except FileNotFoundError:
+                wb.save(nombre_archivo)                      
+                form.save()
             return redirect ('Index')
         else:
             Titulo = 'Formulario de Inspección de la parte trasera.'
