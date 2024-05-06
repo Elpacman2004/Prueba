@@ -30,6 +30,7 @@ label {
 }
 
 input[type="text"],
+input[type="number"],
 input[type="password"],
 .form-check-input {
     width: calc(100% - 20px);
@@ -38,6 +39,18 @@ input[type="password"],
     border-radius: 5px;
     background-color: #333;
     color: #fff;
+}
+
+input[type="file"],
+.file-input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .btn-primary {
@@ -49,6 +62,7 @@ input[type="password"],
     background-color: #4CAF50;
     color: #fff;
     cursor: pointer;
+    margin-top: 20px;
     transition: background-color 0.3s, color 0.3s;
     position: relative;
 }
@@ -62,51 +76,16 @@ input[type="password"],
     color: rgb(204, 0, 0);
 }
 
-/* Estilo para el label de los radio buttons */
-.radio-vertical label {
-    display: inline-block; /* Alinea los labels en línea */
-    margin-right: 10px; /* Espacio entre el label y el radio button */
-}
-
-/* Estilo para el contenedor del menú de subir foto */
-#menu-subir-foto {
-    background-color: #ffffff; /* Fondo blanco */
-    padding: 20px; /* Espacio interno alrededor del menú */
-    border-radius: 5px; /* Bordes redondeados */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
-}
-
-/* Estilo para el botón de subir foto */
-#btn-subir-foto {
-    background-color: #4caf50; /* Color verde */
-    color: #ffffff; /* Texto blanco */
-    padding: 10px 20px; /* Padding interno */
-    border: none; /* Sin borde */
-    border-radius: 5px; /* Bordes redondeados */
-    cursor: pointer; /* Cambia el cursor a mano al pasar el mouse */
-    transition: background-color 0.3s ease; /* Transición suave al cambiar color */
-}
-
-/* Estilo para cambiar el color de fondo del botón al pasar el mouse */
-#btn-subir-foto:hover {
-    background-color: #388e3c; /* Color verde más oscuro al pasar el mouse */
-}
-
-/* Asegúrate de que el contenedor del formulario no oculta el contenido desbordado */
-#id-de-tu-contenedor {
-    overflow: visible;
-}
-
-/* Asegúrate de que el botón de enviar está en el flujo normal del documento */
-#id-de-tu-boton {
-    position: relative;
-}
-
 .radio-group {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+}
+
+.radio-option {
+    display: flex;
+    flex-direction: column;
 }
 
 .radio-group label {
@@ -143,4 +122,75 @@ input[type="password"],
 
 form {
     overflow: visible;
+}
+
+.Menu-de-Imagen{
+    background-color: #333;
+    padding: 20px;
+    border-radius: 5px;
+
+}
+
+#btn-Menu-de-Imagen {
+    background-color: #4caf50;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+
+.radio-container {
+    display: inline-block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    user-select: none;
+}
+
+/* Estilo para el radio button oculto */
+.radio-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Estilo para el círculo personalizado */
+.radio-container .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #eee;
+    border-radius: 50%;
+}
+
+/* Estilo para el círculo interno cuando el radio button está seleccionado */
+.radio-container input:checked ~ .checkmark {
+    background-color: #2196F3;
+}
+
+.radio-container .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.radio-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.radio-container .checkmark:after {
+    top: 9px;
+    left: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
 }

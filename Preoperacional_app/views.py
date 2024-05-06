@@ -1,17 +1,25 @@
 from django .shortcuts import render, redirect
+from django.core.files.storage import default_storage
 from .froms import DatosGeneralesForm, InspeccionForm, FrontPartForm, SideForm, BackPartForm
-from .models import Datos_generales, Inspeccion, Vehiculo, Histoial_archivos
+from .models import Datos_generales, Inspeccion, Vehiculo, Histoial_archivos, Images
 from builtins import ValueError
 from openpyxl import Workbook, load_workbook
 from django.http import HttpResponse
 from datetime import datetime
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from django.http import JsonResponse
 import shutil
 from django.utils import timezone
 import os
 import pandas as pd
 import string
+import time
+from docx import Document
+from docx.shared import Inches
+import io
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.shared import Pt
+
 
 
 hoy = datetime.now()
@@ -20,6 +28,7 @@ dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 
 dia_semana = dias_semana[hoy.weekday()]
 date_str = datetime.now().strftime('%Y-%m-%d')
 hora = hoy.hour
+hoy_y_hora = datetime.now().strftime('%Y/%m/%d Hora %H:%M')
 
 
 def Search(request):
@@ -45,25 +54,24 @@ def FormG (request):
             if historial_archivos.exists():
                 ultimo_archivo = historial_archivos.latest('created_at')
                 nombre_archivo = ultimo_archivo.Nombre_archivo
+                word_file_name = f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data["vehiculo"])}/Archivos de imagenes/Imagenes.docx'
                 
                 shutil.copy(nombre_archivo, f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/Copy.xlsx")
                 
                 now = timezone.now()
                 days_passed = (now - ultimo_archivo.created_at).days
                 
+                print(f'Han pasado {days_passed} días desde que se creo este archivo.')   
+        
+                doc = Document(word_file_name)
                 wb = load_workbook(filename= nombre_archivo)
+                request.session['word_file_name'] = word_file_name
                 request.session['Ruta'] = str(General_Data['vehiculo'])
                 request.session['nombre_archivo'] = nombre_archivo
-                if days_passed == 7 or 14 or 21:
-                    wb = load_workbook(filename= nombre_archivo)
-                    if days_passed ==7:
-                        ws = wb.create_sheet("Semana 2")
-                    elif days_passed == 14:
-                        ws = wb.create_sheet("Semana 3")
-                    elif days_passed == 21:
-                        ws = wb.create_sheet("Semana 4")
-                        
-                elif days_passed == 30:
+                
+                doc.add_heading(str(hoy_y_hora), 0)
+                                       
+                if days_passed == 29:
                     new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
                     shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
                     Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
@@ -71,32 +79,44 @@ def FormG (request):
                     wb = load_workbook(filename= new_file_name)
                     request.session['nombre_archivo'] = new_file_name
                     
-            else:
+                if days_passed >= 20:
+                    Semana = "Semana 4"
+                    request.session['Sheet'] = Semana
+                elif days_passed >= 13: 
+                    Semana = "Semana 3"
+                    request.session['Sheet'] = Semana
+                elif days_passed >= 6:
+                    Semana = "Semana 2"
+                    request.session['Sheet'] = Semana
+                else:
+                    Semana = "Semana 1"
+                    request.session['Sheet'] = Semana
+                    
+            else:  
                 folder_path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}"
+                folder_path2 = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/Archivos de imagenes"
+                os.makedirs(folder_path2, exist_ok=True)
                 os.makedirs(folder_path, exist_ok=True)
+                
+                word_file_name = f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data["vehiculo"])}/Archivos de imagenes/Imagenes.docx'
                 new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
                 shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
+                doc = Document()
+                
+                doc.add_heading(str(hoy_y_hora), 0)
+                
                 Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
                 Historial.save()
-                wb = load_workbook(filename= new_file_name)
-                request.session['nombre_archivo'] = new_file_name
                 
-            if days_passed >= 21:
-                Semana = "Semana 4"
-                request.session['Sheet'] = Semana
-            elif days_passed >= 14: 
-                Semana = "Semana 3"
-                request.session['Sheet'] = Semana
-            elif days_passed >= 7:
-                Semana = "Semana 2"
-                request.session['Sheet'] = Semana
-            else:
-                Semana = "Semana 1"
+                wb = load_workbook(filename= new_file_name)
+                request.session['word_file_name'] = word_file_name
+                request.session['nombre_archivo'] = new_file_name
+                Semana = 'Semana 1'
                 request.session['Sheet'] = Semana
                 
             sheet = wb[Semana]
-            sheet['E5'] = str(General_Data['vehiculo'])
-            sheet['U5'] = General_Data['Proyecto']
+            sheet['F5'] = str(General_Data['vehiculo'])
+            sheet['L5'] = General_Data['Proyecto']
             if dia_semana == 'Lunes':
                 if hora >= 6 and hora < 14:
                     sheet['G39'] = General_Data['Nombre']
@@ -107,13 +127,45 @@ def FormG (request):
                 sheet['G42'] = General_Data['Fecha']
             elif dia_semana == 'Martes':
                 if hora >= 6 and hora < 14:
+                    sheet['H39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['H40'] = General_Data['Nombre'] 
+                else:
+                    sheet['H41'] = General_Data['Nombre']   
+                sheet['H42'] = General_Data['Fecha']
+            elif dia_semana == 'Miércoles':
+                if hora >= 6 and hora < 14:
+                    sheet['I39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['I40'] = General_Data['Nombre'] 
+                else:
+                    sheet['I41'] = General_Data['Nombre']   
+                sheet['I42'] = General_Data['Fecha']
+            elif dia_semana == 'Jueves':
+                if hora >= 6 and hora < 14:
                     sheet['J39'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
                     sheet['J40'] = General_Data['Nombre'] 
                 else:
                     sheet['J41'] = General_Data['Nombre']   
                 sheet['J42'] = General_Data['Fecha']
-            elif dia_semana == 'Miércoles':
+            elif dia_semana == 'Viernes':
+                if hora >= 6 and hora < 14:
+                    sheet['K39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['K40'] = General_Data['Nombre'] 
+                else:
+                    sheet['K41'] = General_Data['Nombre']   
+                sheet['K42'] = General_Data['Fecha']
+            elif dia_semana == 'Sábado':
+                if hora >= 6 and hora < 14:
+                    sheet['L39'] = General_Data['Nombre']
+                elif hora >= 14 and hora < 22:
+                    sheet['L40'] = General_Data['Nombre'] 
+                else:
+                    sheet['L41'] = General_Data['Nombre']   
+                sheet['L42'] = General_Data['Fecha']
+            else:
                 if hora >= 6 and hora < 14:
                     sheet['M39'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
@@ -121,39 +173,8 @@ def FormG (request):
                 else:
                     sheet['M41'] = General_Data['Nombre']   
                 sheet['M42'] = General_Data['Fecha']
-            elif dia_semana == 'Jueves':
-                if hora >= 6 and hora < 14:
-                    sheet['P39'] = General_Data['Nombre']
-                elif hora >= 14 and hora < 22:
-                    sheet['P40'] = General_Data['Nombre'] 
-                else:
-                    sheet['P41'] = General_Data['Nombre']   
-                sheet['P42'] = General_Data['Fecha']
-            elif dia_semana == 'Viernes':
-                if hora >= 6 and hora < 14:
-                    sheet['S39'] = General_Data['Nombre']
-                elif hora >= 14 and hora < 22:
-                    sheet['S40'] = General_Data['Nombre'] 
-                else:
-                    sheet['S41'] = General_Data['Nombre']   
-                sheet['S42'] = General_Data['Fecha']
-            elif dia_semana == 'Sábado':
-                if hora >= 6 and hora < 14:
-                    sheet['V39'] = General_Data['Nombre']
-                elif hora >= 14 and hora < 22:
-                    sheet['V40'] = General_Data['Nombre'] 
-                else:
-                    sheet['V41'] = General_Data['Nombre']   
-                sheet['V42'] = General_Data['Fecha']
-            else:
-                if hora >= 6 and hora < 14:
-                    sheet['Y39'] = General_Data['Nombre']
-                elif hora >= 14 and hora < 22:
-                    sheet['Y40'] = General_Data['Nombre'] 
-                else:
-                    sheet['Y41'] = General_Data['Nombre']   
-                sheet['Y42'] = General_Data['Fecha']
             
+            doc.save(word_file_name)
             wb.save(filename= request.session.get('nombre_archivo'))
             return redirect('FormI')
         else:
@@ -169,298 +190,374 @@ def FormG (request):
 
 def FormI(request):
     if request.method == 'POST':
+        global dia_semana
         form = InspeccionForm(request.POST, request.FILES)
-        print(request.POST) 
+        
+        images=Images.objects.create(
+            Nivel_aceite_NC = request.FILES['Nivel_aceite_NC'] if 'Nivel_aceite_NC' in request.FILES else None,
+            capot_asegurado_NC = request.FILES['capot_asegurado_NC'] if 'capot_asegurado_NC' in request.FILES else None,
+            bornes_baterias_ajustados_NC = request.FILES['bornes_baterias_ajustados_NC'] if 'bornes_baterias_ajustados_NC' in request.FILES else None,
+            indicadores_tablero_control_NC = request.FILES['indicadores_tablero_control_NC'] if 'indicadores_tablero_control_NC' in request.FILES else None,
+            aire_acondicionado_NC = request.FILES['aire_acondicionado_NC'] if 'aire_acondicionado_NC' in request.FILES else None,
+            freno_estacionamiento_NC = request.FILES['freno_estacionamiento_NC'] if 'freno_estacionamiento_NC' in request.FILES else None,
+            limpiaparabrisas_NC = request.FILES['limpiaparabrisas_NC'] if 'limpiaparabrisas_NC' in request.FILES else None,
+            pito_electrico_NC = request.FILES['pito_electrico_NC'] if 'pito_electrico_NC' in request.FILES else None,
+            cinturones_seguridad_NC = request.FILES['cinturones_seguridad_NC'] if 'cinturones_seguridad_NC' in request.FILES else None,
+            equipo_prevencion_seguridad_NC = request.FILES['equipo_prevencion_seguridad_NC'] if 'equipo_prevencion_seguridad_NC' in request.FILES else None,
+            botiquin_primeros_auxilios_NC = request.FILES['botiquin_primeros_auxilios_NC'] if 'botiquin_primeros_auxilios_NC' in request.FILES else None,
+            extintor_NC = request.FILES['extintor_NC'] if 'extintor_NC' in request.FILES else None,
+            kit_carreteras_NC = request.FILES['kit_carreteras_NC'] if 'kit_carreteras_NC' in request.FILES else None,
+            sensor_externo_velocidad_NC = request.FILES['sensor_externo_velocidad_NC'] if 'sensor_externo_velocidad_NC' in request.FILES else None, 
+        )
+        
         if form.is_valid():
             Sheet = request.session.get('Sheet', None)
+            Word = request.session.get('word_file_name', None)
             if Sheet is None:
+                return redirect('FormG')
+            elif Word is None:
+                print ('¡¡¡Eror el archivo word no existe!!!')
                 return redirect('FormG')
             
             nombre_archivo = request.session.get('nombre_archivo')
             inspeccion = form.cleaned_data
-            print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
             sheet = wb[Sheet]
+            
+            
             N=9
             
             if dia_semana == 'Lunes':
                 
                 for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            sheet['G'+str(N)] = value
-                            sheet['H'+str(N)] = 'x'
-                            sheet['I'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['H'+str(N)] = value
-                            sheet['I'+str(N)] = 'x'
-                            sheet['G'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['I'+str(N)] = value
-                            sheet['G'+str(N)] = 'x'
-                            sheet['H'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            sheet['G'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Martes':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['J'+str(N)] = value
-                            sheet['K'+str(N)] = 'x'
-                            sheet['L'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['K'+str(N)] = value
-                            sheet['L'+str(N)] = 'x'
-                            sheet['J'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['L'+str(N)] = value
-                            sheet['J'+str(N)] = 'x'
-                            sheet['K'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            sheet['J'+str(N)] = value
-                            N+=1         
-            elif dia_semana == 'Miércoles':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['M'+str(N)] = value
-                            sheet['N'+str(N)] = 'x'
-                            sheet['O'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['N'+str(N)] = value
-                            sheet['O'+str(N)] = 'x'
-                            sheet['M'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['O'+str(N)] = value
-                            sheet['M'+str(N)] = 'x'
-                            sheet['N'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            sheet['M'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Jueves':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            sheet['P'+str(N)] = value
-                            sheet['Q'+str(N)] = 'x'
-                            sheet['R'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            sheet['Q'+str(N)] = value
-                            sheet['R'+str(N)] = 'x'
-                            sheet['P'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            sheet['R'+str(N)] = value
-                            sheet['P'+str(N)] = 'x'
-                            sheet['Q'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            sheet['P'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Viernes':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['S'+str(N)] = value
-                            sheet['T'+str(N)] = 'x'
-                            sheet['U'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['T'+str(N)] = value
-                            sheet['U'+str(N)] = 'x'
-                            sheet['S'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['U'+str(N)] = value
-                            sheet['S'+str(N)] = 'x'
-                            sheet['T'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            sheet['S'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Sábado':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['V'+str(N)] = value
-                            sheet['W'+str(N)] = 'x'
-                            sheet['X'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['W'+str(N)] = value
-                            sheet['X'+str(N)] = 'x'
-                            sheet['V'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['X'+str(N)] = value
-                            sheet['V'+str(N)] = 'x'
-                            sheet['W'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            sheet['V'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Domingo':
-                   for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Y'+str(N)] = value
-                            sheet['Z'+str(N)] = 'x'
-                            sheet['AA'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Z'+str(N)] = value
-                            sheet['AA'+str(N)] = 'x'
-                            sheet['Y'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['AA'+str(N)] = value
-                            sheet['Y'+str(N)] = 'x'
-                            sheet['Z'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            sheet['Y'+str(N)] = value
-                            N+=1
                    
-            wb.save(nombre_archivo)                   
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        else: 
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['G'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        else:  
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['G'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['G'+str(N)] = value
+                            N+=1
+            
+            elif dia_semana == 'Martes':
                 
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        else: 
+                            sheet['H'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['H'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['H'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        else:  
+                            sheet['H'+str(N)] = value.temporary_file_path()
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['H'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['H'+str(N)] = value
+                            N+=1    
+        
+            elif dia_semana == 'Miércoles':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        else: 
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['I'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        else:  
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['I'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Jueves':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        else: 
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['J'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        else:  
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['J'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Viernes':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else: 
+                            sheet['K'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['K'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['K'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else:  
+                            sheet['K'+str(N)] = value   
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else:
+                            sheet['K'+str(N)] = value
+                            
+            elif dia_semana == 'Sábado':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        else: 
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['L'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        else:  
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['L'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Domingo':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        else: 
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['M'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        else:  
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['M'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['M'+str(N)] = value
+                            N+=1
+
+            wb_C = None
+            try:
+                wb_C = load_workbook('C:/Users/Dagelec LTDA//Desktop/Pruebas_excel/Vehículo LTS-285/Copy.xlsx') 
+            except FileNotFoundError:
+                pass
+
+            if wb_C is not None:
+                Sheet_O = wb[Sheet]
+                Sheet_C = wb_C[Sheet]
+
+                rows_O = Sheet_O['B9':'M24']  
+                rows_C = Sheet_C['B9':'M24']
+
+                df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
+                df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])
+
+                differences = df_C.compare(df_O)
+                differences = differences.dropna(how='all')
+                N = 46
+
+
+                for index, row in differences.iterrows():
+                    for column in differences.columns:
+                        if column[1] == 'self' and pd.notna(row[column]):
+                            previous_value = row[(column[0], "self")]
+                            new_value = row[(column[0], "other")]
+
+                            if previous_value != 'none':
+                                message = (f'En el campo {df_O.loc[index, 0]} fue cambiado de {previous_value} a {new_value}.')
+                            else:
+                                dia_semana = ''
+
+                            if dia_semana == 'Lunes':
+                                sheet['A'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Martes':
+                                sheet['C'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Miercoles':
+                                sheet['E'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Jueves':
+                                sheet['G'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Viernes':
+                                sheet['I'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Sábado':
+                                sheet['K'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Domingo':
+                                sheet['M'+str(N)] = message
+                                N = N + 1
+                            else:
+                                dia_semana = dias_semana[hoy.weekday()]
+                                pass
+            
+            doc = Document(Word)
+            
+            for file_name, file in request.FILES.items():
+                    
+                    paragraph = doc.add_paragraph()
+                    run = paragraph.add_run(file_name)
+                    run.font.size = Pt(16)
+                    doc.add_picture(file, width=Inches(3))
+                    paragraph = doc.add_paragraph()
+                    run = paragraph.add_run(file.name)
+                    run.font.size = Pt(12)
+
+            
+            request.session['N'] = N
+            wb.save(nombre_archivo)
+            doc.save(Word) 
+            images.save()                
             form.save()
             return redirect ('FormFP')
         else:
             Titulo = 'Formulario de Inspección.'
             error = 'Tienes que llenar todos los campos para continuar con el formulario.'
-            form = InspeccionForm(request.POST, request.FILES)
+            form = InspeccionForm()
             return render(request, 'Forms/Form.html', {'form': form,
                                                               'error': error,
                                                               'Title' : Titulo
@@ -475,11 +572,22 @@ def FormI(request):
 
 def FormFP(request):
     if request.method == 'POST':
+
         form = FrontPartForm(request.POST, request.FILES)
-        print(request.POST)
+        
+        images=Images.objects.create(
+            funcionamiento_luces_delanteras_NC = request.FILES['funcionamiento_luces_delanteras_NC'] if 'funcionamiento_luces_delanteras_NC' in request.FILES else None,
+            vidrio_delantero_sin_fisuras_NC = request.FILES['vidrio_delantero_sin_fisuras_NC'] if 'vidrio_delantero_sin_fisuras_NC' in request.FILES else None,
+            placa_delantera_legible_NC = request.FILES['placa_delantera_legible_NC'] if 'placa_delantera_legible_NC' in request.FILES else None,
+            Labrado_de_las_llantas_delanteras_NC = request.FILES['Labrado_de_las_llantas_delanteras_NC'] if 'Labrado_de_las_llantas_delanteras_NC' in request.FILES else None,
+        )
         
         if form.is_valid():
+            global dia_semana
             Sheet = request.session.get('Sheet', None)
+            N2 = request.session.get('N', None)
+            Word = request.session.get('word_file_name', None)
+            
             if Sheet is None:
                 return redirect('FormG')
             nombre_archivo = request.session.get('nombre_archivo')
@@ -492,280 +600,326 @@ def FormFP(request):
             if dia_semana == 'Lunes':
                 
                 for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['G'+str(N)] = value
-                            sheet['H'+str(N)] = 'x'
-                            sheet['I'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['H'+str(N)] = value
-                            sheet['I'+str(N)] = 'x'
-                            sheet['G'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['I'+str(N)] = value
-                            sheet['G'+str(N)] = 'x'
-                            sheet['H'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            sheet['G'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Martes':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['J'+str(N)] = value
-                            sheet['K'+str(N)] = 'x'
-                            sheet['L'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['K'+str(N)] = value
-                            sheet['L'+str(N)] = 'x'
-                            sheet['J'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['L'+str(N)] = value
-                            sheet['J'+str(N)] = 'x'
-                            sheet['K'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            sheet['J'+str(N)] = value
-                            N+=1         
-            elif dia_semana == 'Miércoles':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['M'+str(N)] = value
-                            sheet['N'+str(N)] = 'x'
-                            sheet['O'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['N'+str(N)] = value
-                            sheet['O'+str(N)] = 'x'
-                            sheet['M'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['O'+str(N)] = value
-                            sheet['M'+str(N)] = 'x'
-                            sheet['N'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            sheet['M'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Jueves':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['P'+str(N)] = value
-                            sheet['Q'+str(N)] = 'x'
-                            sheet['R'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Q'+str(N)] = value
-                            sheet['R'+str(N)] = 'x'
-                            sheet['P'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['R'+str(N)] = value
-                            sheet['P'+str(N)] = 'x'
-                            sheet['Q'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            sheet['P'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Viernes':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['S'+str(N)] = value
-                            sheet['T'+str(N)] = 'x'
-                            sheet['U'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['T'+str(N)] = value
-                            sheet['U'+str(N)] = 'x'
-                            sheet['S'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['U'+str(N)] = value
-                            sheet['S'+str(N)] = 'x'
-                            sheet['T'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            sheet['S'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Sábado':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['V'+str(N)] = value
-                            sheet['W'+str(N)] = 'x'
-                            sheet['X'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['W'+str(N)] = value
-                            sheet['X'+str(N)] = 'x'
-                            sheet['V'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['X'+str(N)] = value
-                            sheet['V'+str(N)] = 'x'
-                            sheet['W'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            sheet['V'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Domingo':
-                   for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Y'+str(N)] = value
-                            sheet['Z'+str(N)] = 'x'
-                            sheet['AA'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Z'+str(N)] = value
-                            sheet['AA'+str(N)] = 'x'
-                            sheet['Y'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['AA'+str(N)] = value
-                            sheet['Y'+str(N)] = 'x'
-                            sheet['Z'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            sheet['Y'+str(N)] = value
-                            N+=1
                    
-            wb.save(nombre_archivo)                   
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        else: 
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['G'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        else:  
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['G'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['G'+str(N)] = value
+                            N+=1
+            
+            elif dia_semana == 'Martes':
                 
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        else: 
+                            sheet['H'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['H'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['H'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        else:  
+                            sheet['H'+str(N)] = value.temporary_file_path()
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['H'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['H'+str(N)] = value
+                            N+=1    
+        
+            elif dia_semana == 'Miércoles':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        else: 
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['I'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        else:  
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['I'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Jueves':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        else: 
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['J'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        else:  
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['J'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Viernes':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else: 
+                            sheet['K'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['K'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['K'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else:  
+                            sheet['K'+str(N)] = value   
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else:
+                            sheet['K'+str(N)] = value
+                            
+            elif dia_semana == 'Sábado':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        else: 
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['L'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        else:  
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['L'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Domingo':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        else: 
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['M'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        else:  
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['M'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['M'+str(N)] = value
+                            N+=1
+
+            wb_C = None
+            try:
+                wb_C = load_workbook('C:/Users/Dagelec LTDA//Desktop/Pruebas_excel/Vehículo LTS-285/Copy.xlsx') 
+            except FileNotFoundError:
+                pass
+
+            if wb_C is not None:
+                Sheet_O = wb[Sheet]
+                Sheet_C = wb_C[Sheet]
+
+                rows_O = Sheet_O['B9':'M24']  
+                rows_C = Sheet_C['B9':'M24']
+
+                df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
+                df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])
+
+                differences = df_C.compare(df_O)
+                differences = differences.dropna(how='all')
+                N = 46
+
+
+                for index, row in differences.iterrows():
+                    for column in differences.columns:
+                        if column[1] == 'self' and pd.notna(row[column]):
+                            previous_value = row[(column[0], "self")]
+                            new_value = row[(column[0], "other")]
+
+                            if previous_value != 'none':
+                                message = (f'En el campo {df_O.loc[index, 0]} fue cambiado de {previous_value} a {new_value}.')
+                            else:
+                                dia_semana = ''
+
+                            if dia_semana == 'Lunes':
+                                sheet['A'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Martes':
+                                sheet['C'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Miercoles':
+                                sheet['E'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Jueves':
+                                sheet['G'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Viernes':
+                                sheet['I'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Sábado':
+                                sheet['K'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Domingo':
+                                sheet['M'+str(N)] = message
+                                N = N + 1
+                            else:
+                                dia_semana = dias_semana[hoy.weekday()]
+                                pass
+
+            doc = Document(Word)
+            
+            for file_name, file in request.FILES.items():
+                    
+                    paragraph = doc.add_paragraph()
+                    run = paragraph.add_run(file_name)
+                    run.font.size = Pt(16)
+                    doc.add_picture(file, width=Inches(3))
+                    paragraph = doc.add_paragraph()
+                    run = paragraph.add_run(file.name)
+                    run.font.size = Pt(12)
+            
+            wb.save(nombre_archivo)                   
+            images.save()
+            doc.save(Word)
             form.save()
             return redirect ('FormS')
         else:
@@ -787,10 +941,21 @@ def FormFP(request):
 def FormS (request):
     if request.method == 'POST':
         form = SideForm(request.POST, request.FILES)
-        print(request.POST)
+        
+        images=Images.objects.create(
+            carroceria_buen_estado_NC = request.FILES['carroceria_buen_estado_NC'] if 'carroceria_buen_estado_NC' in request.FILES else None,
+            vidrios_laterales_sin_fisuras_NC = request.FILES['vidrios_laterales_sin_fisuras_NC'] if 'vidrios_laterales_sin_fisuras_NC' in request.FILES else None,
+            direccionales_funcionando_NC = request.FILES['direccionales_funcionando_NC'] if 'direccionales_funcionando_NC' in request.FILES else None,
+            espejo_exterior_buen_estado_NC = request.FILES['espejo_exterior_buen_estado_NC'] if 'espejo_exterior_buen_estado_NC' in request.FILES else None,
+             sin_fugas_tanque_combustible = request.FILES['sin_fugas_tanque_combustible'] if 'sin_fugas_tanque_combustible' in request.FILES else None,
+        )
         
         if form.is_valid():
+            global dia_semana
             Sheet = request.session.get('Sheet', None)
+            Word = request.session.get('word_file_name', None)
+            
+            N2 = request.session.get('N', None)
             if Sheet is None:
                 return redirect('FormG')
             nombre_archivo = request.session.get('nombre_archivo')
@@ -803,280 +968,327 @@ def FormS (request):
             if dia_semana == 'Lunes':
                 
                 for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['G'+str(N)] = value
-                            sheet['H'+str(N)] = 'x'
-                            sheet['I'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['H'+str(N)] = value
-                            sheet['I'+str(N)] = 'x'
-                            sheet['G'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['I'+str(N)] = value
-                            sheet['G'+str(N)] = 'x'
-                            sheet['H'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            sheet['G'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Martes':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['J'+str(N)] = value
-                            sheet['K'+str(N)] = 'x'
-                            sheet['L'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['K'+str(N)] = value
-                            sheet['L'+str(N)] = 'x'
-                            sheet['J'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['L'+str(N)] = value
-                            sheet['J'+str(N)] = 'x'
-                            sheet['K'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            sheet['J'+str(N)] = value
-                            N+=1         
-            elif dia_semana == 'Miércoles':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['M'+str(N)] = value
-                            sheet['N'+str(N)] = 'x'
-                            sheet['O'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['N'+str(N)] = value
-                            sheet['O'+str(N)] = 'x'
-                            sheet['M'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['O'+str(N)] = value
-                            sheet['M'+str(N)] = 'x'
-                            sheet['N'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            sheet['M'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Jueves':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['P'+str(N)] = value
-                            sheet['Q'+str(N)] = 'x'
-                            sheet['R'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Q'+str(N)] = value
-                            sheet['R'+str(N)] = 'x'
-                            sheet['P'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['R'+str(N)] = value
-                            sheet['P'+str(N)] = 'x'
-                            sheet['Q'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            sheet['P'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Viernes':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['S'+str(N)] = value
-                            sheet['T'+str(N)] = 'x'
-                            sheet['U'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['T'+str(N)] = value
-                            sheet['U'+str(N)] = 'x'
-                            sheet['S'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['U'+str(N)] = value
-                            sheet['S'+str(N)] = 'x'
-                            sheet['T'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            sheet['S'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Sábado':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['V'+str(N)] = value
-                            sheet['W'+str(N)] = 'x'
-                            sheet['X'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['W'+str(N)] = value
-                            sheet['X'+str(N)] = 'x'
-                            sheet['V'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['X'+str(N)] = value
-                            sheet['V'+str(N)] = 'x'
-                            sheet['W'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            sheet['V'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Domingo':
-                   for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Y'+str(N)] = value
-                            sheet['Z'+str(N)] = 'x'
-                            sheet['AA'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Z'+str(N)] = value
-                            sheet['AA'+str(N)] = 'x'
-                            sheet['Y'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['AA'+str(N)] = value
-                            sheet['Y'+str(N)] = 'x'
-                            sheet['Z'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            sheet['Y'+str(N)] = value
-                            N+=1
                    
-            wb.save(nombre_archivo)                   
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        else: 
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['G'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['G'+str(N)] = value.name
+                        else:  
+                            sheet['G'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['G'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['G'+str(N)] = value
+                            N+=1
+            
+            elif dia_semana == 'Martes':
                 
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        else: 
+                            sheet['H'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['H'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['H'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        else:  
+                            sheet['H'+str(N)] = value.temporary_file_path()
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['H'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['H'+str(N)] = value
+                            N+=1    
+        
+            elif dia_semana == 'Miércoles':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        else: 
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['I'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        else:  
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['I'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Jueves':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        else: 
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['J'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        else:  
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['J'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Viernes':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else: 
+                            sheet['K'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['K'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['K'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else:  
+                            sheet['K'+str(N)] = value   
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else:
+                            sheet['K'+str(N)] = value
+                            
+            elif dia_semana == 'Sábado':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        else: 
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['L'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        else:  
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['L'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Domingo':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        else: 
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['M'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        else:  
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['M'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['M'+str(N)] = value
+                            N+=1
+
+            wb_C = None
+            try:
+                wb_C = load_workbook('C:/Users/Dagelec LTDA//Desktop/Pruebas_excel/Vehículo LTS-285/Copy.xlsx') 
+            except FileNotFoundError:
+                pass
+
+            if wb_C is not None:
+                Sheet_O = wb[Sheet]
+                Sheet_C = wb_C[Sheet]
+
+                rows_O = Sheet_O['B9':'M24']  
+                rows_C = Sheet_C['B9':'M24']
+
+                df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
+                df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])
+
+                differences = df_C.compare(df_O)
+                differences = differences.dropna(how='all')
+                N = 46
+
+
+                for index, row in differences.iterrows():
+                    for column in differences.columns:
+                        if column[1] == 'self' and pd.notna(row[column]):
+                            previous_value = row[(column[0], "self")]
+                            new_value = row[(column[0], "other")]
+
+                            if previous_value != 'none':
+                                message = (f'En el campo {df_O.loc[index, 0]} fue cambiado de {previous_value} a {new_value}.')
+                            else:
+                                dia_semana = ''
+
+                            if dia_semana == 'Lunes':
+                                sheet['A'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Martes':
+                                sheet['C'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Miercoles':
+                                sheet['E'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Jueves':
+                                sheet['G'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Viernes':
+                                sheet['I'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Sábado':
+                                sheet['K'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Domingo':
+                                sheet['M'+str(N)] = message
+                                N = N + 1
+                            else:
+                                dia_semana = dias_semana[hoy.weekday()]
+                                pass
+            
+            doc = Document(Word)
+            
+            for file_name, file in request.FILES.items():
+                    
+                    paragraph = doc.add_paragraph()
+                    run = paragraph.add_run(file_name)
+                    run.font.size = Pt(16)
+                    doc.add_picture(file, width=Inches(3))
+                    paragraph = doc.add_paragraph()
+                    run = paragraph.add_run(file.name)
+                    run.font.size = Pt(12)
+            
+            
+            wb.save(nombre_archivo)                   
+            images.save()
+            doc.save(Word)
             form.save()
             return redirect ('FormBP')
         else:
@@ -1095,339 +1307,361 @@ def FormS (request):
                                                           'Title': Titulo
                                                           })
         
-def generate_columns(start, end):
-    letters = list(string.ascii_uppercase)
-    columns = letters[letters.index(start):]
-    if end in letters:
-        columns += [f'A{letter}' for letter in letters[:letters.index(end)+1]]
-    return columns
-
 def FormBP(request):
     if request.method == 'POST':
         form = BackPartForm(request.POST, request.FILES)
-        print(request.POST)
+        
+        images=Images.objects.create(
+            luces_traseras_funcionando_NC = request.FILES['luces_traseras_funcionando_NC'] if 'luces_traseras_funcionando_NC' in request.FILES else None,
+            sonido_alarma_reversa_NC = request.FILES['sonido_alarma_reversa_NC'] if 'sonido_alarma_reversa_NC' in request.FILES else None,
+            labrado_llantas_traseras_NC = request.FILES['labrado_llantas_traseras_NC'] if 'labrado_llantas_traseras_NC' in request.FILES else None,
+            labrado_llanta_repuesto_NC = request.FILES['labrado_llanta_repuesto_NC'] if 'labrado_llanta_repuesto_NC' in request.FILES else None,
+            placa_trasera_legible_NC = request.FILES['placa_trasera_legible_NC'] if 'placa_trasera_legible_NC' in request.FILES else None,
+        )
         
         if form.is_valid():
+            global dia_semana
             Sheet = request.session.get('Sheet', None)
+            N2 = request.session.get('N', None)
             if Sheet is None:
                 return redirect('FormG')
             Ruta = request.session.get('Ruta')
             nombre_archivo = request.session.get('nombre_archivo')
+            Word = request.session.get('word_file_name', None)
+            
             inspeccion = form.cleaned_data
+            file_path = f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{Ruta}/Copy.xlsx'
             print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
             sheet = wb[Sheet]
             N=34
             
-            columnas = ['LUNESC', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA']
-            
             if dia_semana == 'Lunes':
                 
                 for field, value in form.cleaned_data.items():
-                    if value == 'C':
+                   
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['G'+str(N)] = value
-                            sheet['H'+str(N)] = 'x'
-                            sheet['I'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['H'+str(N)] = value
-                            sheet['I'+str(N)] = 'x'
-                            sheet['G'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['I'+str(N)] = value
-                            sheet['G'+str(N)] = 'x'
-                            sheet['H'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['G'+str(N)] = value.name
-                        else:
-                            
+                        else: 
                             sheet['G'+str(N)] = value
                             N+=1
-            elif dia_semana == 'Martes':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
                             
-                            
-                            sheet['J'+str(N)] = value
-                            sheet['K'+str(N)] = 'x'
-                            sheet['L'+str(N)] = 'x'
-                            N+=1
                     elif value == 'NC':
                         if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
+                            sheet['G'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['G'+str(N)] = value.temporary_file_path()
                         else:
-                            
-                            
-                            sheet['K'+str(N)] = value
-                            sheet['L'+str(N)] = 'x'
-                            sheet['J'+str(N)] = 'x'
+                            sheet['G'+str(N)] = value
                             N+=1
+                            
                     elif value == 'NA':
                         if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['L'+str(N)] = value
-                            sheet['J'+str(N)] = 'x'
-                            sheet['K'+str(N)] = 'x'
+                            sheet['G'+str(N)] = value.name
+                        else:  
+                            sheet['G'+str(N)] = value
                             N+=1
+                            
                     else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['J'+str(N)] = value.name
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['G'+str(N)] = value.temporary_file_path() 
                         else:
-                            
-                            sheet['J'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Miércoles':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['M'+str(N)] = value
-                            sheet['N'+str(N)] = 'x'
-                            sheet['O'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['N'+str(N)] = value
-                            sheet['O'+str(N)] = 'x'
-                            sheet['M'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['O'+str(N)] = value
-                            sheet['M'+str(N)] = 'x'
-                            sheet['N'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['M'+str(N)] = value.name
-                        else:
-                            
-                            sheet['M'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Jueves':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['P'+str(N)] = value
-                            sheet['Q'+str(N)] = 'x'
-                            sheet['R'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Q'+str(N)] = value
-                            sheet['R'+str(N)] = 'x'
-                            sheet['P'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['R'+str(N)] = value
-                            sheet['P'+str(N)] = 'x'
-                            sheet['Q'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['P'+str(N)] = value.name
-                        else:
-                            
-                            sheet['P'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Viernes':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['S'+str(N)] = value
-                            sheet['T'+str(N)] = 'x'
-                            sheet['U'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['T'+str(N)] = value
-                            sheet['U'+str(N)] = 'x'
-                            sheet['S'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['U'+str(N)] = value
-                            sheet['S'+str(N)] = 'x'
-                            sheet['T'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['S'+str(N)] = value.name
-                        else:
-                            
-                            sheet['S'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Sábado':
-                for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['V'+str(N)] = value
-                            sheet['W'+str(N)] = 'x'
-                            sheet['X'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['W'+str(N)] = value
-                            sheet['X'+str(N)] = 'x'
-                            sheet['V'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['X'+str(N)] = value
-                            sheet['V'+str(N)] = 'x'
-                            sheet['W'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['V'+str(N)] = value.name
-                        else:
-                            
-                            sheet['V'+str(N)] = value
-                            N+=1
-            elif dia_semana == 'Domingo':
-                   for field, value in form.cleaned_data.items():
-                    if value == 'C':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Y'+str(N)] = value
-                            sheet['Z'+str(N)] = 'x'
-                            sheet['AA'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NC':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['Z'+str(N)] = value
-                            sheet['AA'+str(N)] = 'x'
-                            sheet['Y'+str(N)] = 'x'
-                            N+=1
-                    elif value == 'NA':
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            
-                            sheet['AA'+str(N)] = value
-                            sheet['Y'+str(N)] = 'x'
-                            sheet['Z'+str(N)] = 'x'
-                            N+=1
-                    else:
-                        if isinstance(value, InMemoryUploadedFile):
-                            sheet['Y'+str(N)] = value.name
-                        else:
-                            
-                            sheet['Y'+str(N)] = value
+                            sheet['G'+str(N)] = value
                             N+=1
             
-            try:
-                df_original = pd.read_excel(f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{Ruta}/Copy.xlsx')
-                df_curr = pd.read_excel(nombre_archivo) 
-
-                pd.set_option('display.max_columns', None)
-                pd.set_option('display.max_rows', None)
-
-                print(df_curr)
-                print(df_original)
-                      
-                for col in columnas:
-                    if col in df_original.columns:
-                        print(f'La columna {col} existe en el DataFrame.')
+            elif dia_semana == 'Martes':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        else: 
+                            sheet['H'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['H'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['H'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['H'+str(N)] = value.name
+                        else:  
+                            sheet['H'+str(N)] = value.temporary_file_path()
+                            N+=1
+                            
                     else:
-                        print(f'La columna {col} no existe en el DataFrame.')
-                        df = pd.read_csv('data.csv')
-                        print(df)
-                df_original_selected = df_original.loc[columnas]
-                df_curr_selected = df_curr.loc[columnas]
-                df_changes = df_curr_selected != df_original_selected
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['H'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['H'+str(N)] = value
+                            N+=1    
+        
+            elif dia_semana == 'Miércoles':
                 
-                df_changes['Combined'] = df_changes.apply(lambda row: ', '.join([f'{col}: {df_curr.loc[row.name, col]}' for col in columnas if row[col]]), axis=1)
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        else: 
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['I'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['I'+str(N)] = value.name
+                        else:  
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['I'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['I'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Jueves':
                 
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        else: 
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['J'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['J'+str(N)] = value.name
+                        else:  
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['J'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['J'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Viernes':
                 
-                with pd.ExcelWriter(nombre_archivo, mode='a') as writer:
-                    df_changes.to_excel(writer, sheet_name='Changes')
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else: 
+                            sheet['K'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['K'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['K'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else:  
+                            sheet['K'+str(N)] = value   
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['K'+str(N)] = value.name
+                        else:
+                            sheet['K'+str(N)] = value
+                            
+            elif dia_semana == 'Sábado':
                 
-                wb.save(nombre_archivo)                      
-                form.save()
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        else: 
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['L'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['L'+str(N)] = value.name
+                        else:  
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['L'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['L'+str(N)] = value
+                            N+=1
+                            
+            elif dia_semana == 'Domingo':
+                
+                for field, value in form.cleaned_data.items():
+                    
+                    if isinstance(value, InMemoryUploadedFile):
+                        file_content = value.read()
+                    elif value == 'C':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        else: 
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NC':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        elif hasattr(value, 'temporary_file_path'):
+                            sheet['M'+str(N)] = value.temporary_file_path()
+                        else:
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    elif value == 'NA':
+                        if isinstance(value, InMemoryUploadedFile):
+                            sheet['M'+str(N)] = value.name
+                        else:  
+                            sheet['M'+str(N)] = value
+                            N+=1
+                            
+                    else:
+                        if isinstance(value, TemporaryUploadedFile):
+                            sheet['M'+str(N)] = value.temporary_file_path() 
+                        else:
+                            sheet['M'+str(N)] = value
+                            N+=1
+
+            wb_C = None
+            try:
+                wb_C = load_workbook('C:/Users/Dagelec LTDA//Desktop/Pruebas_excel/Vehículo LTS-285/Copy.xlsx') 
             except FileNotFoundError:
-                wb.save(nombre_archivo)                      
-                form.save()
+                pass
+
+            if wb_C is not None:
+                Sheet_O = wb[Sheet]
+                Sheet_C = wb_C[Sheet]
+
+                rows_O = Sheet_O['B9':'M24']  
+                rows_C = Sheet_C['B9':'M24']
+
+                df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
+                df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])
+
+                differences = df_C.compare(df_O)
+                differences = differences.dropna(how='all')
+                N = 46
+
+
+                for index, row in differences.iterrows():
+                    for column in differences.columns:
+                        if column[1] == 'self' and pd.notna(row[column]):
+                            previous_value = row[(column[0], "self")]
+                            new_value = row[(column[0], "other")]
+
+                            if previous_value != 'none':
+                                message = (f'En el campo {df_O.loc[index, 0]} fue cambiado de {previous_value} a {new_value}.')
+                            else:
+                                dia_semana = ''
+
+                            if dia_semana == 'Lunes':
+                                sheet['A'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Martes':
+                                sheet['C'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Miercoles':
+                                sheet['E'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Jueves':
+                                sheet['G'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Viernes':
+                                sheet['I'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Sábado':
+                                sheet['K'+str(N)] = message
+                                N = N + 1
+                            elif dia_semana == 'Domingo':
+                                sheet['M'+str(N)] = message
+                                N = N + 1
+                            else:
+                                dia_semana = dias_semana[hoy.weekday()]
+                                pass 
+            
+            doc = Document(Word)
+    
+            
+            for file_name, file in request.FILES.items():
+                    
+                    paragraph = doc.add_paragraph()
+                    run = paragraph.add_run(file_name)
+                    run.font.size = Pt(16)
+                    doc.add_picture(file, width=Inches(3))
+                    paragraph = doc.add_paragraph()
+                    run = paragraph.add_run(file.name)
+                    run.font.size = Pt(12)
+            
+            os.remove(file_path)
+            wb.save(nombre_archivo)                      
+            form.save()
+            doc.save(Word)
+            images.save()
             return redirect ('Index')
         else:
             Titulo = 'Formulario de Inspección de la parte trasera.'
@@ -1444,4 +1678,3 @@ def FormBP(request):
         return render(request, 'Forms/Form.html', {'form': form,
                                                           'Title': Titulo
                                                           })
-        

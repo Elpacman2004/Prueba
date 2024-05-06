@@ -17,11 +17,10 @@
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
-    } 
-
+    }
 </style>
 <body>
-    <div class="container">
+.    <div class="container">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <h2>{{Title}}</h2>
@@ -35,26 +34,29 @@
                             {% endif %}
                             {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_gasometro' %}
                                 <div class ='radio-group' data-group-name="{{ field.label }}">
-                                    <ul>
-                                        <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="C">
-                                        <label class="form-check-label" for="{{ field.auto_id }}">Cumple</label>
+                                    <ul class="radio-group">
+                                        <li class="radio-option">
+                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}_C" name="{{ field.html_name }}" value="C">
+                                            <label class="form-check-label" for="{{ field.auto_id }}_C">Cumple</label>
+                                        </li>
                                     </ul>
                                             
-                                    <ul>
-                                        <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="NC">
-                                        <label class="form-check-label" for="{{ field.auto_id }}">No cumple</label>
-                                    </ul>
-                                        
-                                    <ul>
-                                        <div id="fotoInput_id_Nivel_aceite" style="display: none;">
-                                            <label for="{{ field.auto_id }}_NC">Subir Imagen:</label>
-                                            <input type="file" id="{{ field.auto_id }}_NC" name="{{ field.html_name }}_NC" accept="image/*">
-                                        </div>
+                                    <ul class="radio-group">
+                                        <li class="radio-option">
+                                            <input class="form-check-input radio-input" type="radio" id="{{ field.auto_id }}_NC" name="{{ field.html_name }}" value="NC">
+                                            <label class="form-check-label" for="{{ field.auto_id }}_NC">No cumple</label>
+                                            <div class='Menu-de-Imagen' id="{{ field.auto_id }}_NC" style="display: none;">
+                                                <label for="{{ field.auto_id }}_NC">Subir Imagen:</label>
+                                                <input type="file" class = 'file-input' id="{{ field.auto_id }}_NC" name="{{ field.html_name }}_NC" accept="image/*">
+                                            </div>
+                                        </li>
                                     </ul>
 
-                                    <ul>
-                                        <input class="form-check-input" type="radio" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="NA">
-                                        <label class="form-check-label" for="{{ field.auto_id }}">No Aplica</label>
+                                    <ul class="radio-group">
+                                        <li class="radio-option">
+                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}_NA" name="{{ field.html_name }}" value="NA">
+                                            <label class="form-check-label" for="{{ field.auto_id }}_NA">No Aplica</label>
+                                        </li> 
                                     </ul>
                                 </ul>
                             </div>

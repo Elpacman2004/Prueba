@@ -11,6 +11,9 @@ class DatosGeneralesForm(forms.ModelForm):
         
         model = Datos_generales
         fields = ['Fecha', 'Proyecto', 'Nombre', 'vehiculo']
+        widgets = {
+            'Proyecto': forms.TextInput(attrs={'placeholder': 'PP-Proyecto-Año'}),
+        }
         
     def clean_vehiculo(self):
         vehiculo_str = self.cleaned_data.get('vehiculo')
