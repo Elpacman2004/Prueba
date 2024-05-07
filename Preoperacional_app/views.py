@@ -19,6 +19,7 @@ from docx.shared import Inches
 import io
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
+from .Conversor import convert_word_to_pdf
 
 
 
@@ -50,28 +51,26 @@ def FormG (request):
             General_Data = form.cleaned_data
             print (General_Data)
             
+            vehiculo = General_Data['vehiculo']
+            
+            
             historial_archivos = Histoial_archivos.objects.filter(vehiculo=General_Data['vehiculo'])
             if historial_archivos.exists():
                 ultimo_archivo = historial_archivos.latest('created_at')
                 nombre_archivo = ultimo_archivo.Nombre_archivo
                 word_file_name = f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data["vehiculo"])}/Archivos de imagenes/Imagenes.docx'
                 
-                shutil.copy(nombre_archivo, f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/Copy.xlsx")
                 
                 now = timezone.now()
                 days_passed = (now - ultimo_archivo.created_at).days
-                
-                print(f'Han pasado {days_passed} días desde que se creo este archivo.')   
-        
-                doc = Document(word_file_name)
-                wb = load_workbook(filename= nombre_archivo)
-                request.session['word_file_name'] = word_file_name
-                request.session['Ruta'] = str(General_Data['vehiculo'])
-                request.session['nombre_archivo'] = nombre_archivo
-                
-                doc.add_heading(str(hoy_y_hora), 0)
+                   
                                        
                 if days_passed == 29:
+                    Mes_pasado = now - timezone.timedelta(days=30)
+                    convert_word_to_pdf(f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\{str(General_Data['vehiculo'])}\\Archivos de imagenes\\Imagenes.docx", f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\{str(General_Data['vehiculo'])}\\Archivos de imagenes\\Imagenes del mes {Mes_pasado}.pdf")
+                    
+                    doc = Document()
+                    
                     new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
                     shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
                     Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
@@ -79,19 +78,27 @@ def FormG (request):
                     wb = load_workbook(filename= new_file_name)
                     request.session['nombre_archivo'] = new_file_name
                     
-                if days_passed >= 20:
-                    Semana = "Semana 4"
-                    request.session['Sheet'] = Semana
-                elif days_passed >= 13: 
-                    Semana = "Semana 3"
-                    request.session['Sheet'] = Semana
-                elif days_passed >= 6:
-                    Semana = "Semana 2"
-                    request.session['Sheet'] = Semana
-                else:
-                    Semana = "Semana 1"
-                    request.session['Sheet'] = Semana
-                    
+                    if days_passed >= 20:
+                        Semana = "Semana 4"
+                        request.session['Sheet'] = Semana
+                    elif days_passed >= 13: 
+                        Semana = "Semana 3"
+                        request.session['Sheet'] = Semana
+                    elif days_passed >= 6:
+                        Semana = "Semana 2"
+                        request.session['Sheet'] = Semana
+                    else:
+                        Semana = "Semana 1"
+                        request.session['Sheet'] = Semana
+               
+                doc = Document(word_file_name)
+                wb = load_workbook(filename= nombre_archivo)
+                request.session['word_file_name'] = word_file_name
+                request.session['Ruta'] = str(General_Data['vehiculo'])
+                request.session['nombre_archivo'] = nombre_archivo
+                
+                doc.add_heading(str(hoy_y_hora), 0)
+                   
             else:  
                 folder_path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}"
                 folder_path2 = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/Archivos de imagenes"
@@ -115,64 +122,72 @@ def FormG (request):
                 request.session['Sheet'] = Semana
                 
             sheet = wb[Semana]
-            sheet['F5'] = str(General_Data['vehiculo'])
-            sheet['L5'] = General_Data['Proyecto']
+            
+            sheet['F5'] = vehiculo.Marca
+            sheet["F7"] = vehiculo.Numero_tarjeta_de_propiedad
+            sheet["F8"] = vehiculo.Fecha_emicion_de_revision_tecnomecanica
+            sheet["L5"] = vehiculo.Modelo
+            sheet["L7"] = vehiculo.Fecha_emicion_SOAT
+            sheet["L8"] = vehiculo.Fecha_emicion_poliza
+            
+            sheet['F6'] = str(General_Data['vehiculo'])
+            sheet['L6'] = General_Data['Proyecto']
             if dia_semana == 'Lunes':
                 if hora >= 6 and hora < 14:
-                    sheet['G39'] = General_Data['Nombre']
+                    sheet['G42'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
-                    sheet['G40'] = General_Data['Nombre'] 
+                    sheet['G43'] = General_Data['Nombre'] 
                 else:
-                    sheet['G41'] = General_Data['Nombre']      
-                sheet['G42'] = General_Data['Fecha']
+                    sheet['G44'] = General_Data['Nombre']      
+                sheet['G45'] = General_Data['Fecha']
             elif dia_semana == 'Martes':
                 if hora >= 6 and hora < 14:
-                    sheet['H39'] = General_Data['Nombre']
+                    sheet['H42'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
-                    sheet['H40'] = General_Data['Nombre'] 
+                    sheet['H43'] = General_Data['Nombre'] 
                 else:
-                    sheet['H41'] = General_Data['Nombre']   
-                sheet['H42'] = General_Data['Fecha']
+                    sheet['H44'] = General_Data['Nombre']   
+                sheet['H45'] = General_Data['Fecha']
             elif dia_semana == 'Miércoles':
                 if hora >= 6 and hora < 14:
-                    sheet['I39'] = General_Data['Nombre']
+                    sheet['I42'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
-                    sheet['I40'] = General_Data['Nombre'] 
+                    sheet['I43'] = General_Data['Nombre'] 
                 else:
-                    sheet['I41'] = General_Data['Nombre']   
-                sheet['I42'] = General_Data['Fecha']
+                    sheet['I44'] = General_Data['Nombre']   
+                sheet['I45'] = General_Data['Fecha']
             elif dia_semana == 'Jueves':
                 if hora >= 6 and hora < 14:
-                    sheet['J39'] = General_Data['Nombre']
+                    sheet['J42'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
-                    sheet['J40'] = General_Data['Nombre'] 
+                    sheet['J43'] = General_Data['Nombre'] 
                 else:
-                    sheet['J41'] = General_Data['Nombre']   
-                sheet['J42'] = General_Data['Fecha']
+                    sheet['J44'] = General_Data['Nombre']   
+                sheet['J45'] = General_Data['Fecha']
             elif dia_semana == 'Viernes':
                 if hora >= 6 and hora < 14:
-                    sheet['K39'] = General_Data['Nombre']
+                    sheet['K42'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
-                    sheet['K40'] = General_Data['Nombre'] 
+                    sheet['K43'] = General_Data['Nombre'] 
                 else:
-                    sheet['K41'] = General_Data['Nombre']   
-                sheet['K42'] = General_Data['Fecha']
+                    sheet['K44'] = General_Data['Nombre']   
+                sheet['K45'] = General_Data['Fecha']
             elif dia_semana == 'Sábado':
                 if hora >= 6 and hora < 14:
-                    sheet['L39'] = General_Data['Nombre']
+                    sheet['L42'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
-                    sheet['L40'] = General_Data['Nombre'] 
+                    sheet['L43'] = General_Data['Nombre'] 
                 else:
-                    sheet['L41'] = General_Data['Nombre']   
-                sheet['L42'] = General_Data['Fecha']
+                    sheet['L44'] = General_Data['Nombre']   
+                sheet['L45'] = General_Data['Fecha']
             else:
                 if hora >= 6 and hora < 14:
-                    sheet['M39'] = General_Data['Nombre']
+                    sheet['M342'] = General_Data['Nombre']
                 elif hora >= 14 and hora < 22:
-                    sheet['M40'] = General_Data['Nombre'] 
+                    sheet['M43'] = General_Data['Nombre'] 
                 else:
-                    sheet['M41'] = General_Data['Nombre']   
-                sheet['M42'] = General_Data['Fecha']
+                    sheet['M44'] = General_Data['Nombre']   
+                sheet['M45'] = General_Data['Fecha']
             
             doc.save(word_file_name)
             wb.save(filename= request.session.get('nombre_archivo'))
@@ -225,7 +240,7 @@ def FormI(request):
             sheet = wb[Sheet]
             
             
-            N=9
+            N=12
             
             if dia_semana == 'Lunes':
                 
@@ -289,7 +304,7 @@ def FormI(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['H'+str(N)] = value.name
                         else:  
-                            sheet['H'+str(N)] = value.temporary_file_path()
+                            sheet['H'+str(N)] = value
                             N+=1
                             
                     else:
@@ -488,15 +503,15 @@ def FormI(request):
                 Sheet_O = wb[Sheet]
                 Sheet_C = wb_C[Sheet]
 
-                rows_O = Sheet_O['B9':'M24']  
-                rows_C = Sheet_C['B9':'M24']
+                rows_O = Sheet_O['B12':'M27']  
+                rows_C = Sheet_C['B12':'M27']
 
                 df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
                 df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])
 
                 differences = df_C.compare(df_O)
                 differences = differences.dropna(how='all')
-                N = 46
+                N = 49
 
 
                 for index, row in differences.iterrows():
@@ -595,7 +610,7 @@ def FormFP(request):
             print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
             sheet = wb[Sheet]
-            N=25
+            N=28
             
             if dia_semana == 'Lunes':
                 
@@ -659,7 +674,7 @@ def FormFP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['H'+str(N)] = value.name
                         else:  
-                            sheet['H'+str(N)] = value.temporary_file_path()
+                            sheet['H'+str(N)] = value
                             N+=1
                             
                     else:
@@ -858,8 +873,8 @@ def FormFP(request):
                 Sheet_O = wb[Sheet]
                 Sheet_C = wb_C[Sheet]
 
-                rows_O = Sheet_O['B9':'M24']  
-                rows_C = Sheet_C['B9':'M24']
+                rows_O = Sheet_O['C28':'M31']  
+                rows_C = Sheet_C['C28':'M31']
 
                 df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
                 df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])
@@ -963,7 +978,7 @@ def FormS (request):
             print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
             sheet = wb[Sheet]
-            N=29
+            N=32
             
             if dia_semana == 'Lunes':
                 
@@ -1027,7 +1042,7 @@ def FormS (request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['H'+str(N)] = value.name
                         else:  
-                            sheet['H'+str(N)] = value.temporary_file_path()
+                            sheet['H'+str(N)] = value
                             N+=1
                             
                     else:
@@ -1226,8 +1241,8 @@ def FormS (request):
                 Sheet_O = wb[Sheet]
                 Sheet_C = wb_C[Sheet]
 
-                rows_O = Sheet_O['B9':'M24']  
-                rows_C = Sheet_C['B9':'M24']
+                rows_O = Sheet_O['C32':'M36']  
+                rows_C = Sheet_C['C37':'M41']
 
                 df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
                 df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])
@@ -1334,7 +1349,7 @@ def FormBP(request):
             print(inspeccion)
             wb = load_workbook(filename= nombre_archivo)
             sheet = wb[Sheet]
-            N=34
+            N=37
             
             if dia_semana == 'Lunes':
                 
@@ -1398,7 +1413,7 @@ def FormBP(request):
                         if isinstance(value, InMemoryUploadedFile):
                             sheet['H'+str(N)] = value.name
                         else:  
-                            sheet['H'+str(N)] = value.temporary_file_path()
+                            sheet['H'+str(N)] = value
                             N+=1
                             
                     else:
@@ -1597,8 +1612,8 @@ def FormBP(request):
                 Sheet_O = wb[Sheet]
                 Sheet_C = wb_C[Sheet]
 
-                rows_O = Sheet_O['B9':'M24']  
-                rows_C = Sheet_C['B9':'M24']
+                rows_O = Sheet_O['C37':'M41']  
+                rows_C = Sheet_C['C37':'M41']
 
                 df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
                 df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])

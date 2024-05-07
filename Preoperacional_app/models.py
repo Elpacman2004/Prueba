@@ -3,7 +3,12 @@ from django.utils import timezone
 
 class Vehiculo(models.Model):
     Placa = models.CharField(max_length=20)
-
+    Numero_tarjeta_de_propiedad= models.IntegerField()
+    Fecha_emicion_de_revision_tecnomecanica = models.DateField(null=True, blank=True)
+    Marca = models.CharField(max_length=20)
+    Modelo = models.IntegerField()
+    Fecha_vencimiento_SOAT = models.DateField(default=timezone.now, null=True, blank=True)
+    Fecha_vencimiento_poliza = models.DateField(default=timezone.now, null=True, blank=True)
     def __str__(self):
         return f"Vehículo {self.Placa}"
     
