@@ -12,7 +12,21 @@ class DatosGeneralesForm(forms.ModelForm):
         model = Datos_generales
         fields = ['Fecha', 'Proyecto', 'Nombre', 'vehiculo']
         widgets = {
-            'Proyecto': forms.TextInput(attrs={'placeholder': 'PP-Proyecto-Año'}),
+            'Proyecto': forms.TextInput(attrs={
+                'placeholder': 'PP-Proyecto-Año',
+                'class': 'form-control',
+                'id': 'inputProyecto',
+                'aria-describedby': 'proyectoHelpBlock'
+            }),
+            'Fecha': forms.DateInput(attrs={
+                'class': 'form-control-plaintext',
+                'id': 'staticFecha',
+                'readonly': 'readonly',
+            }),
+        }
+                                     
+        help_texts = {
+            'Proyecto': 'Debes colocar el proyecto y el año en el formato PP-Proyecto-Año. Ejemplo: PP-001-2021',
         }
         
     def clean_vehiculo(self):
@@ -43,8 +57,14 @@ class InspeccionForm(forms.ModelForm):
             'extintor',
             'kit_carreteras',
             'sensor_externo_velocidad',
-            'Nivel_gasometro',
+            'Nivel_del_combustible',
         ]
+        
+        widgets = {
+            'Nivel_del_combustible': forms.ClearableFileInput(attrs={
+                'capture': 'camera',
+            }),
+        }
         
 
     def __init__(self, *args, **kwargs):

@@ -69,3 +69,10 @@ button[type="submit"] {
     display: block;
     position: relative;
 }
+
+span {
+    color: #ffffffc7;
+    display: block;
+    position: relative;
+    margin-top: 10px;
+}

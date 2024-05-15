@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-r68j&iw0e0m_0kc5g&xh$1@^6ny&u9hmp6tm)l8sj_dvtt21r1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['563b-190-24-61-163.ngrok-free.app']
+ALLOWED_HOSTS = ['c4fd-190-24-61-163.ngrok-free.app']
 
 
 # Application definition
@@ -41,9 +41,11 @@ INSTALLED_APPS = [
     'Preoperacional_app',
     'dal',
     'dal_select2',
+    'SPV_app',
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -131,4 +133,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-

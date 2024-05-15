@@ -62,7 +62,7 @@ class Inspeccion(models.Model):
     
     sensor_externo_velocidad = models.CharField(max_length=250, null=False, blank=False)
 
-    Nivel_gasometro = models.ImageField(default = False, upload_to='Nivel gasometro', null=False)
+    Nivel_del_combustible = models.ImageField(default = False, upload_to='Nivel gasometro', null=False)
     def __str__(self):
         return f"Inspeccion de {self.vehiculo} el {self.fecha}"
 
