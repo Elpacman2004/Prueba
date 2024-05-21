@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary assignment form</title>
+    <link rel="stylesheet" href="{% static "Styles/Forms/Salary.css" %}">
+</head>
+
+<style>
+        #Value_Transportation_Allowance,
+        #Value_Travel_Allowance,
+        #Which {
+        display: none;
+    }
+
+    body{
+        background-image: url("{% static 'Img/Salario.jpg' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>    
+
+<header>
+</header>
+
+<body>
+    <div clasS='container'>
+        <h1>Asignación salarial</h1>  
+
+        <form method = 'POST'>
+            {% csrf_token %}
+            <p>
+                <label for="{{ form.Basic_salary.id_for_label }}">Salario basico:</label>
+                {{ form.Basic_salary }}
+            </p>
+
+            <div class="radio-group" data-group-name="Transportation Allowance">
+                <p>
+                    <label for="{{ form.Transportation_Allowance.id_for_label }}">Subsidio de transporte:</label>
+                </p>
+                {{ form.Transportation_Allowance }}
+                <div id="Value_Transportation_Allowance" style="display: none;">
+                    <p>
+                        <label for="{{ form.Value_Transportation_Allowance.id_for_label }}">Valor del subsidio de transporte:</label>
+                        {{ form.Value_Transportation_Allowance }}
+                    </p>
+                </div>
+            </div>
+
+            <p>
+                <label for="{{ form.Bonus.id_for_label }}">Bonificacion:</label>
+                {{ form.Bonus }}
+            </p>
+
+            <div class="radio-group" data-group-name="Travel Allowance">
+                <p>
+                    <label for="{{ form.Travel_Allowance.id_for_label }}">Viaticos:</label>
+                </p>
+                {{ form.Travel_Allowance }}
+                <div id="Value_Travel_Allowance" style="display: none;">
+                    <p>
+                        <label for="{{ form.Value_Travel_Allowance.id_for_label }}">Valor de los viaticos:</label>
+                        {{ form.Value_Travel_Allowance }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="radio-group" data-group-name="Other">
+                <p>
+                    <label for="{{ form.Other.id_for_label }}">Otros:</label>
+                </p>
+                {{ form.Other }}
+                <div id="Which" style="display: none;">
+                    <p>
+                        <label for="{{ form.Which.id_for_label }}">Cual:</label>
+                        {{ form.Which }}
+                    </p>
+                </div>
+            </div>
+
+            <p>
+                <label for="{{ form.Basic_salary.id_for_label }}">Observaciones:</label>
+                {{ form.Observations }}
+            </p>
+
+            <button type="submit">Enviar</button>
+
+        </form>
+    </diV>
+    <script src="{% static 'Js/Salary.js' %}"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 from django import forms
-from .models import GeneralData, Staff_requisition, Human_Resources, Conditions_of_employment
+from .models import GeneralData, Staff_requisition, Data_of_selected_personnel, Conditions_of_employment, Salary_assignment
+from datetime import time
 
 class GeneralDataForm(forms.ModelForm):
     class Meta:
@@ -11,6 +12,10 @@ class GeneralDataForm(forms.ModelForm):
             'Process_Project': 'Proceso/Proyecto',
             'Date_of_application': 'Fecha de solicitud',
             'Applicants_Position': 'Cargo del solicitante',
+        }
+        
+        widgets = {
+            'Date_of_application': forms.DateInput(attrs={'type': 'date'}),
         }
 
 class Staff_requisitionForm(forms.ModelForm):
@@ -33,7 +38,7 @@ class Staff_requisitionForm(forms.ModelForm):
             'Job_Profile': 'Perfil del cargo',
         }
 
-class Human_ResourcesForm(forms.ModelForm):
+class Data_of_selected_personnelForm(forms.ModelForm):
     choises_YF = [
         ('Yes', 'Si'),
         ('No', 'No'),
@@ -78,7 +83,7 @@ class Human_ResourcesForm(forms.ModelForm):
     Overall = forms.ChoiceField(choices=chises_Overall, label='Overol')
     
     class Meta:
-        model = Human_Resources
+        model = Data_of_selected_personnel
         fields = ['Name', 'Identification_document', 'Adress', 'Phone_number', 'Movile_number', 'Current_HIP', 'AFP', 'RH', 'Allergies', 'Yellow_fever', 'Tetanus', 'Medical_examination', 'Does_the_applicant_meet_the_job_profile', 'Pants', 'Shirt', 'Shoes', 'Overall', 'Observations', 'Work_References', 'Personal_References']
         labels = {
             'Name': 'Nombre',
@@ -96,7 +101,11 @@ class Human_ResourcesForm(forms.ModelForm):
             'Work_References': 'Referencias laborales',
             'Personal_References': 'Referencias personales',
         }
-        
+    
+class TimeInput(forms.TimeInput):
+    input_type = 'time'
+    format = '%H:%M'   
+    
 class Conditions_of_employmentForm(forms.ModelForm):
     Choises_H = [
         ('Yes', 'Si'),
@@ -114,21 +123,63 @@ class Conditions_of_employmentForm(forms.ModelForm):
         ('Yes', 'Si'),
         ('No', 'No'),
     ]
-    Management_and_Trust = forms.ChoiceField(choices=Choises_MT, widget=forms.RadioSelect, label='Manejo y confianza')  
-    
+    Management_and_Trust = forms.ChoiceField(choices=Choises_MT, widget=forms.RadioSelect, label='Manejo y confianza')
     
     
     class Meta:
         model = Conditions_of_employment
-        fields = ['Hired', 'Type_of_Contract', 'Overtime_Hours', 'Duration_of_Engagement', 'Management_and_Trust', 'Workplace', 'Start_Date', 'Monday_to_Friday_start', 'Saturday_start']
+        fields = ['Hired', 'Type_of_Contract', 'Overtime_Hours', 'Duration_of_Engagement', 'Management_and_Trust', 'Workplace', 'Start_Date', 'Monday_to_Friday_start', 'Monday_to_Friday_end', 'Saturday_start', 'Saturday_end']
         labels = {
             'Hired': 'Contratado',
-            'Type_of_Contract': 'Tipo de contrato',
+            'Type_of_Contract': 'Clase de contrato',
             'Overtime_Hours': 'Horas extras',
             'Duration_of_Engagement': 'Tiempo de vinculación:',
             'Management_and_Trust': 'Manejo y confianza',
             'Workplace': 'Lugar de trabajo',
             'Start_Date': 'Fecha Inicio de labores:',
-            'Monday_to_Friday_start': 'Lunes a viernes',
-            'Saturday_start': 'Sabado',   
+            'Monday_to_Friday_start': 'Hora de entrada dias lunes a viernes',
+            'Monday_to_Friday_end': 'Hora de salida dias lunes a viernes',
+            'Saturday_start': 'Hora de entrada dia sabado',
+            'Saturday_end': 'Hora de salida dia sabado',
+        }
+        
+        widgets = {
+            'Duration_of_Engagement': forms.DateInput(attrs={'type': 'date'}),
+            'Start_Date': forms.DateInput(attrs={'type': 'date'}),
+            'Monday_to_Friday_start': TimeInput(format='%H:%M'),
+            'Monday_to_Friday_end': TimeInput(format='%H:%M'),
+            'Saturday_start': TimeInput(format='%H:%M'),
+            'Saturday_end': TimeInput(format='%H:%M'),
+        }
+        
+class Salary_assignment_form (forms.ModelForm):
+    
+    Choises_TA = [
+        ('Yes', 'Si'),
+        ('No', 'No'),
+    ]
+    Transportation_Allowance = forms.ChoiceField(choices=Choises_TA, widget=forms.RadioSelect, label= 'Subsidio de transporte')
+        
+    Choises_TVA = [
+        ('Yes', 'Si'),
+        ('No', 'No'),
+    ]
+    Travel_Allowance = forms.ChoiceField(choices=Choises_TVA, widget=forms.RadioSelect, label='Viaticos')
+    
+    Choises_O = [
+        ('Yes', 'Si'),
+        ('No', 'No'),
+    ]
+    Other = forms.ChoiceField(choices=Choises_O, widget=forms.RadioSelect, label='Otros')
+        
+    class Meta:
+        model = Salary_assignment
+        fields = ['Basic_salary', 'Transportation_Allowance', 'Value_Transportation_Allowance', 'Bonus', 'Travel_Allowance', 'Value_Travel_Allowance', 'Other', 'Which', 'Observations']
+        labels = {
+            'Basic_salary': 'Salario basico',
+            'Value_Transportation_Allowance': 'Valor del subsidio de transporte',
+            'Bonus': 'Bonificacion',
+            'Value_Travel_Allowance': 'Valor de los viaticos',
+            'Which': 'Cual',
+            'Observations': 'Observaciones'
         }

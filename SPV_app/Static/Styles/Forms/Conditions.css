@@ -1,0 +1,60 @@
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    color: #fff;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+input[type="time"],
+.form-check-input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
+}
+
+label {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.Error {
+    color: rgb(204, 0, 0);
+}
+
+.tt-menu {
+    z-index: 1000;
+    position: absolute;
+    width: 100%;
+    top: 100%;
+    left: 0;
+    background-color: #333;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #008d0c; 
+    color: #fff; 
+    border: none; 
+    padding: 10px 20px; 
+    cursor: pointer; 
+    border-radius: 5px; 
+    font-size: 16px; 
+    margin-top: 20px; 
+    transition: background-color 0.3s, color 0.3s;
+    left: 0; 
+}
+
+button:hover {
+    background-color: #fff; 
+    color: #008d0c; 
+}

@@ -23,7 +23,7 @@ class Staff_requisition (models.Model):
     def __str__(self):
         return self.Name_of_the_Position_Requested
     
-class Human_Resources (models.Model):
+class Data_of_selected_personnel (models.Model):
     Name = models.CharField(max_length=100)
     Identification_document = models.IntegerField()
     Adress = models.CharField(max_length=100)
@@ -49,17 +49,32 @@ class Human_Resources (models.Model):
         return self.Name
     
 class Conditions_of_employment (models.Model):
-    Hired = models.CharField(max_length=2)
+    Hired = models.CharField(max_length=4)
     Type_of_Contract = models.CharField(max_length=100)
-    Overtime_Hours = models.CharField(max_length=2)
+    Overtime_Hours = models.CharField(max_length=4)
     Duration_of_Engagement = models.DateField(default=date.today() + relativedelta(years=1))
-    Management_and_Trust = models.CharField(max_length=2)
+    Management_and_Trust = models.CharField(max_length=4)
     Workplace = models.CharField(max_length=100)
     Start_Date = models.DateField(default= timezone.now)
-    Monday_to_Friday_start = models.TimeField(default=time(7, 0))
-    Monday_to_Friday_end = models.TimeField(default=time(17, 0))
-    Saturday_start = models.TimeField(default=time(7, 0))
-    Saturday_end = models.TimeField(default=time(17, 0))
+    Monday_to_Friday_start = models.TimeField(default=timezone.datetime.strptime('07:00', '%H:%M').time())
+    Monday_to_Friday_end = models.TimeField(default=timezone.datetime.strptime('17:30', '%H:%M').time())
+    Saturday_start = models.TimeField(default=timezone.datetime.strptime('07:00', '%H:%M').time())
+    Saturday_end = models.TimeField(default=timezone.datetime.strptime('11:00', '%H:%M').time())
+    
+    def __str__(self):
+        return self.Name
+    
+class Salary_assignment (models.Model):
+    Basic_salary = models.IntegerField()
+    Transportation_Allowance = models.CharField(max_length=4)
+    Value_Transportation_Allowance = models.IntegerField(blank=True, null=True)
+    Bonus = models.IntegerField(blank=True, null=True)
+    Travel_Allowance = models.CharField(max_length=4)
+    Value_Travel_Allowance  = models.IntegerField(blank=True, null=True)
+    Other = models.CharField(max_length=4)
+    Which = models.CharField(max_length=100, blank=True, null=True)
+    Observations = models.TextField(null=True, blank=True)
+    
     
     def __str__(self):
         return self.Name

@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signatures</title>
+    <link rel="stylesheet" href={% static "Styles/Signatures.css" %}> 
+</head> 
+
+<style>
+    body{
+        background-image: url("{% static 'Img/Firmas.jpg' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
+
+<body>
+    <div class='container'>
+        <form method="POST" action={% url "Signatures" %}>
+            {% csrf_token %}
+            <h1>Apartado de firmas</h1>
+
+            {% for message in messages %}
+                <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                </div>
+            {% endfor %}
+            <form>
+                <div>
+                    <h2>Solocitado por</h2>
+                    <canvas id="signature-pad-1" width=400 height=200></canvas>
+                    <button type="button" id="clear-1">Borrar</button>
+                    <input type="hidden" id="signature-input-1" name="signature1">
+                </div>
+                
+                <div>
+                    <h2>Director General / Gerencia General</h2>
+                    <canvas id="signature-pad-2" width=400 height=200></canvas>
+                    <button type="button" id="clear-2">Borrar</button>
+                    <input type="hidden" id="signature-input-2" name="signature2">
+                </div>
+
+                <div>
+                    <h2>VoBo Coord GH</h2>
+                    <canvas id="signature-pad-3" width=400 height=200></canvas>
+                    <button type="button" id="clear-3">Borrar</button>
+                    <input type="hidden" id="signature-input-3" name="signature3">
+                </div>
+
+                <div>
+                    <h2>Gestión Humana</h2>
+                    <canvas id="signature-pad-4" width=400 height=200></canvas>
+                    <button type="button" id="clear-4">Borrar</button>
+                    <input type="hidden" id="signature-input-4" name="signature4">
+                </div>
+
+                <div>
+                    <h2>Coordinador de Proceso</h2>
+                    <canvas id="signature-pad-5" width=400 height=200></canvas>
+                    <button type="button" id="clear-5">Borrar</button>
+                    <input type="hidden" id="signature-input-5" name="signature5">
+                </div>
+
+                <div>
+                    <h2>Director General / Gerencia Gral</h2>
+                    <canvas id="signature-pad-6" width=400 height=200></canvas>
+                    <button type="button" id="clear-6">Borrar</button>
+                    <input type="hidden" id="signature-input-6" name="signature6">
+                </div>
+
+                <center><button id="save" type="submit">Enviar</button></center>
+            </form>
+    <div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+
+    <script src="{% static 'Js/Signatures.js' %}"></script>
+</body>
+</html>

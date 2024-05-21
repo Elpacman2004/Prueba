@@ -5,17 +5,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>General form SPV</title>
+    <link rel="stylesheet" href="{% static "Styles/Forms/General.css" %}">
 </head>
+<style>
+    body{
+        background-image: url("{% static 'Img/Entrevista5.jpg' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
 
 <body>
-    <form method="post">
-        <h1>Datos generales</h1>
+    <div class='container'>
+        <form method="post">
+            <h1>Datos generales</h1>
 
-        {{ error.as_p }}
-        {% csrf_token %} 
-        {{ form.as_p }}
+            {{ error.as_p }}
+            {% csrf_token %} 
+            {{ form.as_p }}
 
-        <button type="submit">Enviar</button>
-    </form>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
 </body>
 </html>

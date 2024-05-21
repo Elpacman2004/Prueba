@@ -5,13 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Index SPV</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'Styles/Index SPV.css' %}">
 </head>
+
+<style>
+    body{
+        background-image: url("{% static 'Img/Entrevista3.png' %}");
+        background-position: center ;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
 
 <header>
     <center><h1>Formulario solicitud de personal y vinculación.</h1></center>
 </header>
 
-<body>    
-    <a href='{% url 'General SPV' %}'><button>Continuar</button></a>
+<body>
+    <center>
+        <div class="Info" method='POST'>
+            <p>{% lorem 5 b random %}</p>
+        </div>
+
+        <a href='{% url 'General SPV' %}'><button>Continuar</button></a>
+    </center>
 </body>
 </html>

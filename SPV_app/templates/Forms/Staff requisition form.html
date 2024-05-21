@@ -4,20 +4,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff requisition</title>
+    <title>Staff requisition form</title>
+    <link rel="stylesheet" href="{% static "Styles/Forms/General.css" %}">
 </head>
+
+<style>
+        #Reason {
+        display: none;
+    }
+
+    body{
+        background-image: url("{% static 'Img/Entrevista6.png' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
 
 <header>
 </header>
 
 <body>
-    <h1>Solicitud de personal</h1>
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
+    <div class='container'>
+        <h1>Solicitud de personal</h1>
 
-        <button type="submit">Enviar</button>
-    <form>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="radio-group" data-group-name="Reason">
+                <p>
+                    <label for="{{ form.Reason.id_for_label }}">Razon:</label>
+                </p>
+                {{ form.Reason }}
+                <div id="Which" style="display: none;">
+                    <p>
+                        <label for="{{ form.Which.id_for_label }}">¿Cual?:</label>
+                        {{ form.Which }}
+                    </p>
+                </div>
+            </div>
+
+            <p>
+                <label for="{{ form.Name_of_the_Position_Requested.id_for_label }}">Nombre del cargo solicitado:</label>
+                {{ form.Name_of_the_Position_Requested }}
+            </p>
+
+            <p>
+                <label for="{{ form.Job_Profile.id_for_label }}">Perfil del cargo:</label>
+                {{ form.Job_Profile }}
+            </p>
+
+            <button type="submit">Enviar</button>
+        <form>
+    </div>
+
+    <script src="{% static 'Js/Staff_requisition.js' %}"></script>
 </body>
 </html>

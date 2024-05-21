@@ -41,8 +41,8 @@ def Search(request):
     results = [vehiculo.Placa for vehiculo in vehiculos]
     return JsonResponse(results, safe=False)
 
-def index(request):
-    return render(request, 'Index.html')
+def Index_preoperational(request):
+    return render(request, 'Index_preoperational.html')
 
 def FormG (request):
     if request.method == 'POST':

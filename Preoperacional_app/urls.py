@@ -1,9 +1,8 @@
-from django.contrib import admin
 from django.urls import path
 from. import views
 
 urlpatterns = [
-    path('', views.index, name='Index'),
+    path('', views.Index_preoperational, name='Index preoperational'),
     path('Search/', views.Search, name='Search'),
     path('GeneralForm/', views.FormG, name='FormG'),
     path('InspectionForm/', views.FormI, name='FormI'),

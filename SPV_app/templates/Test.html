@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signature Pad Example</title>
+    <style>
+        #signature-pad {
+            border: 1px solid;
+            height: 200px;
+            width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <form method="POST" action={% url "Test" %}>
+        {% csrf_token %}
+        <canvas id="signature-pad"></canvas>
+        <button id="save" type="submit">Save</button>
+        <button id="clear" type="button">Clear</button>
+        <input type="hidden" id="signature-input" name="signature">
+    </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <script>
+        var canvas = document.querySelector('#signature-pad');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        var signaturePad = new SignaturePad(canvas);
+        document.querySelector('#save').addEventListener('click', function (event) {
+            var data = signaturePad.toDataURL(); // save image as PNG
+            document.querySelector('#signature-input').value = data;
+            // Here you can send `data` to your server and save it as an image.
+        });
+        document.querySelector('#clear').addEventListener('click', function () {
+            signaturePad.clear();
+        });
+    </script>
+</body>
+</html>

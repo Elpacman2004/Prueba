@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index page</title>
+    <link rel="stylesheet" href="{% static "Styles/Index.css" %}">
+</head>
+<header>
+</header>
+
+<body>
+    <center><img src="{% static 'Img/error404.jpg' %}" alt="Error 404"></center>
+
+    {% extends "base_generic.html" %}
+
+    <center>{% block content %}
+    <h1>Error 404</h1>
+    <p>Lo sentimos, la página que estás buscando no se pudo encontrar.</p>
+    {% endblock %}</center>
+</body>
+</html>

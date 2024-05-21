@@ -10,7 +10,8 @@ if settings.DEBUG:
     urlpatterns = [
         path('__debug__/', include(debug_toolbar.urls)),
         path('admin/', admin.site.urls),
-        path('', include('Preoperacional_app.urls')),
+        path('', include('Principal_page.urls')),
+        path('Preoperational/', include('Preoperacional_app.urls')),
         path('SPV/', include('SPV_app.urls')),
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     
