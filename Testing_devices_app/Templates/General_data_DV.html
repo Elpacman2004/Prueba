@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspection, maintenance and calibration</title>
+    <link rel="stylesheet" href="{% static "Styles/Forms/Data_personnel.css" %}">
+</head>
+
+<style>
+    body{
+        background-image: url("{% static 'Img/Devices.jpeg' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>  
+
+<header>
+</header>
+
+<body>
+    <div class='container'>
+        <h1>Datos generales del dispositivo</h1>
+        <form method = 'POST'>
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .froms import GeneralDataForm, Staff_requisitionForm, Data_of_selected_personnelForm, Conditions_of_employmentForm, Salary_assignment_form
+from .forms import GeneralDataForm, Staff_requisitionForm, Data_of_selected_personnelForm, Conditions_of_employmentForm, Salary_assignment_form
 import os
 import shutil
 from openpyxl import Workbook, load_workbook
@@ -19,7 +19,6 @@ def GeneralForm_SPV (request):
         form = GeneralDataForm(request.POST)
         if form.is_valid():
             Clean_data = form.cleaned_data
-            print(Clean_data)
             New_file =  f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/SPV/{Clean_data["Name"]} SPV.xlsx'
             request.session['file name'] = New_file
             

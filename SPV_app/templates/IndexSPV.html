@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Index SPV</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'Styles/Index SPV.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'Styles/Index.css' %}">
 </head>
 
 <style>
@@ -19,16 +19,93 @@
 </style>
 
 <header>
-    <center><h1>Formulario solicitud de personal y vinculación.</h1></center>
+    <div class="header">
+        <div id="navContainer" class="nav-container">
+            <button class="nav-button" onclick="toggleNavMenu()">☰</button>
+            <div id="navMenu" class="nav-menu">
+                <a href="{% url 'Index' %}">Pagina principal</a>
+                <a href="{% url 'Index preoperational' %}">Formulario de Inspeccion preoperacional</a>
+                <a href="{% url 'Index TD' %}">Formulario para realizar hoja de vida equipos de seguimiento y/o elementos dielectricos</a>
+                <a href="{% url 'InexHVV' %}">Formulario para realizar hoja de vida vehículos</a>
+                <a href="{% url 'IndexSE' %}">Formulario de Solicitud de equipos HTA y otros</a>
+            </div>
+        </div>
+        <center><h1>Formulario solicitud de personal y vinculación.</h1></center>
+    </div>
 </header>
 
-<body>
-    <center>
-        <div class="Info" method='POST'>
-            <p>{% lorem 5 b random %}</p>
-        </div>
+    <body>
+        <center>
+            <div class="Info" method='POST'>
+                    <div class='Title'>
+                        <p><h2>Propósitos del Formulario de Solicitud de Personal<br></h2>
+                    </div>
+                    <div clas='Text'>
+                        <strong>1.Identificación de Necesidades de Personal:<br></strong>
+                        
+                        ·Permite a los gerentes y supervisores identificar y formalizar la necesidad de contratar nuevo personal o reemplazar a alguien.<br>
+                        ·Facilita la comunicación de las necesidades específicas del departamento a la oficina de recursos humanos.<br><br>
+                        <strong>2.Estandarización del Proceso de Contratación:<br></strong>
+                        
+                        ·Proporciona un formato estándar para solicitar nuevas contrataciones, asegurando que toda la información relevante se recopile de manera uniforme.<br>
+                        ·Mejora la organización y el seguimiento del proceso de contratación.<br><br>
+                        <strong>3.Aprobaciones y Control Presupuestario:<br></strong>
+                        
+                        ·Facilita la aprobación de nuevas contrataciones por parte de la gerencia y el control financiero.<br>
+                        ·Ayuda a asegurar que las nuevas contrataciones estén alineadas con el presupuesto y los objetivos de la empresa.<br><br>
+                        <strong>4.Documentación y Registro:<br></strong>
+                        
+                        ·Mantiene un registro formal de todas las solicitudes de contratación, lo que es útil para auditorías y análisis futuros.<br>
+                        ·Ayuda a rastrear el historial de contratación y las tendencias de crecimiento del personal en la empresa.<br><br>
+                    </div>
+                    <div class='Title'>
+                        <h2>Beneficios del Formulario de Vinculación<br></h2>
+                    </div>
+                    <div clas='Text'>
+                        <strong>1.Recolección de Información:<br></strong>
+                    
+                        ·Recopila toda la información necesaria sobre el nuevo empleado, incluyendo datos personales, referencias, y detalles de contacto.<br>
+                        ·Asegura que la empresa tenga toda la información requerida para cumplir con las normativas laborales y de seguridad.<br><br>
+                        <strong>2.Integración del Empleado:<br></strong>
+                        
+                        ·Facilita el proceso de integración del nuevo empleado en la empresa, asegurando que se cubran todos los aspectos necesarios para su incorporación.<br>
+                        ·Incluye detalles sobre la posición, salario, beneficios, y otros aspectos contractuales importantes.<br><br>
+                        <strong>3.Cumplimiento Legal y Normativo:<br></strong>
+                        
+                        ·Ayuda a asegurar que la empresa cumpla con todas las leyes y regulaciones laborales, incluyendo la obtención de firmas en contratos y acuerdos importantes.<br>
+                        ·Reduce el riesgo de disputas legales al tener toda la documentación en orden y firmada.<br><br>
+                        <strong>4.Orientación y Formación Inicial:<br></strong>
+                        
+                        ·Proporciona una guía clara para el nuevo empleado sobre su rol y responsabilidades, así como la política y cultura de la empresa.<br>
+                        ·Puede incluir detalles sobre el proceso de orientación y formación inicial, ayudando al empleado a adaptarse más rápidamente.<br><br>
+                    </div>
 
-        <a href='{% url 'General SPV' %}'><button>Continuar</button></a>
-    </center>
-</body>
+                    <div class='Title'>
+                        <h2>Conclusión<br></h2>
+                    </div>
+
+                    <div clas='Text'>
+                        Implementar estos formularios en la empresa no solo optimiza el proceso de contratación y vinculación, sino que también asegura un nivel de profesionalismo y cumplimiento normativo. Ayudan a estructurar y formalizar las etapas cruciales de la gestión del talento humano, facilitando tanto la tarea del departamento de recursos humanos como la integración efectiva de los nuevos empleados.</p>
+                    </div>
+
+                <a href='{% url 'General SPV' %}'><button>Continuar</button></a>
+            </div>
+        </center>
+
+        <script>
+            function toggleNavMenu() {
+                var x = document.getElementById("navMenu");
+                if (x.style.display === "none") {
+                    x.style.display = "block";
+                } else {
+                    x.style.display = "none";
+                }
+            }
+
+            function toggleNavMenu() {
+                var x = document.getElementById("navMenu");
+                x.classList.toggle("visible");
+            }
+        </script>
+    </body>
 </html>

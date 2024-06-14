@@ -8,5 +8,24 @@ pip install pywin32
 pip install pdfkit
 pip install pymysql
 pip install django-debug-toolbar
+pip install opencv-python
 
 Z:\SERVER\Dagelec\Logistica\1- VEHICULOS DAGELEC\02. HOJAS DE VIDA VEHICULOS
+
+from django import forms
+from django.core.exceptions import ValidationError
+
+class YourForm(forms.Form):
+    # ... tus otros campos ...
+
+    image_field = forms.ImageField()
+
+    def clean_image_field(self):
+        image = self.cleaned_data.get('image_field')
+
+        if image:
+            main, sub = image.content_type.split('/')
+            if not (main == 'image' and sub in ['jpeg', 'pjpeg', 'gif', 'png']):
+                raise ValidationError('Please use a JPEG, GIF or PNG image.')
+
+        return image

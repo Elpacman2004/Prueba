@@ -1,6 +1,7 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist
-from .models import Datos_generales, Inspeccion, FrontPart, Side, BackPart, Vehiculo
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from .models import Datos_generales, Inspeccion, FrontPart, Side, BackPart
+from Hoja_de_vida_vehiculo.models import General_data
 from dal import autocomplete
 from dal_select2.widgets import ModelSelect2
 
@@ -32,7 +33,7 @@ class DatosGeneralesForm(forms.ModelForm):
     def clean_vehiculo(self):
         vehiculo_str = self.cleaned_data.get('vehiculo')
         try:
-            vehiculo_instance = Vehiculo.objects.get(Placa=vehiculo_str)
+            vehiculo_instance = General_data.objects.get(License_plate=vehiculo_str)
         except ObjectDoesNotExist:
             self.add_error('vehiculo', "El vehículo con placa {} no existe.".format(vehiculo_str))
             return None
@@ -115,7 +116,15 @@ class BackPartForm (forms.ModelForm):
             'labrado_llantas_traseras',
             'labrado_llanta_repuesto',
             'placa_trasera_legible',
+            'Obser',
         ]
+        
+        widgets = {
+            'Obser': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+            }),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

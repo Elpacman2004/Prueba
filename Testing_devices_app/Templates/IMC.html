@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" href="{% static "Styles/Forms/Data_personnel.css" %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
+</head>
+
+<style>
+    body{
+        background-image: url("{% static 'Img/Devices.jpeg' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>  
+
+<header>
+</header>
+
+<body>
+    <div class='container'>
+        <h1> Inspección, Mantenimiento y/o Calibración de equipos</h1>
+        {{ error }}
+        <form method = 'POST'>
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="dropdown-container">
+                
+            </div>
+
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            document.getElementById('id_Device').classList.add('dropdown-input');
+            var vehiculos = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.whitespace,
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: "{% url 'search' %}?q=%QUERY",
+                    wildcard: '%QUERY'
+                }
+            });
+        
+            $('#id_Device').typeahead(null, {
+                source: vehiculos
+            }).on('typeahead:render', function() {
+                // Mueve el menú desplegable debajo del campo de entrada después de que se haya generado
+                $('.tt-menu').insertAfter('#id_Device');
+            });
+        });
+         </script>
+
+</body>
+</html>

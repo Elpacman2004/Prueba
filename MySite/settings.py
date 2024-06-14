@@ -40,9 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Preoperacional_app',
     'SPV_app',
+    'Hoja_de_vida_vehiculo',
+    'Testing_devices_app',
     'Principal_page',
     'dal',
     'dal_select2',
+    'Solicitud_de_equipos_app'
 ]
 
 MIDDLEWARE = [

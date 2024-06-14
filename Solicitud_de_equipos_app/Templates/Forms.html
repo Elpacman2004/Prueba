@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General data vehicle</title>
+    <link rel="stylesheet" href="{% static "Styles/Request_devices.css" %}">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/corejs-typeahead/1.2.1/typeahead.bundle.min.js"></script>
+</head>
+
+<style>
+    body{
+        background-image: url("{% static 'Img/' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>  
+
+<header>
+</header>
+
+<body>
+    <div class='container'>
+        <h1>{{ title }}</h1>
+        <form id="myForm" method = 'POST'>
+            <div id="newFields"></div>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="button" id="addButton">Agregar</button>
+
+            <center><button type="submit">Enviar</button></center>
+        </form>
+
+        <script>
+            $(document).ready(function() {
+                document.getElementById('id_column').classList.add('dropdown-input');
+                var url = "{% url 'SearchSE' 'Equipment' %}?q=%QUERY";
+                console.log(url);
+                var vehiculos = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.whitespace,
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: url,
+                        wildcard: '%QUERY'
+                    }
+                });
+
+                $('#id_column').typeahead(null, {
+                    source: vehiculos
+                }).on('typeahead:render', function() {
+                    $('.tt-menu').insertAfter('#id_column');
+                });
+                var counter = 0;
+                var addButton = $("#addButton");
+                var form = $("#myForm"); 
+
+                if (addButton.length && form.length) {
+                    addButton.click(function(e) {
+                        e.preventDefault();
+                        var columnValue = $("#id_column").val();
+                        $("#id_column").val('');
+
+                        var suggestions = ["cmc_356_omicron", "cmc_353_omicron", "doble_f6150", "ponovo_l336i", "cpc_100_omicron", "cp_td1_omicron", "cp_cu1_omicron", "cp_cr500_omicron", "ct_analyzer_omicron", "franalizer_omicron", "cp_cb2_omicron", "ponovo_pct_200ai", "factor_hv_hipot_gd6000a", "potencia_tang_delta_avo", "micro_contactos_dmo200", "vacuometro_digital", "calidad_energia_metrel", "tiempos_operacion_gdkc_6a", "tiempos_operacion_egil", "sata40_tension_minima", "relacion_trans_ttr_gbii", "r_devanados_hv_gdzrs_20a", "r_devanados_hv_gdzrc_5a", "milliohm_sonel", "medidor_mit520_megger", "medidor_mit500_megger", "medidor_mic_5010_sonel", "medidor_mic_5015_sonel", "medidor_mic_5010_sonel_25kv", "medidor_mic_5005_sonel", "telurometro_metrotech", "chisporroteo_megger_ots60bp", "circuito_mpc_5_5_50", "vlf_sinus_34kv_megger", "probador_cts_cct_xsaid", "vaisala_punto_rocio", "recuperador_gas_sf6_gr", "recuperador_gas_sf6_pe", "bomba_vacio_sf6", "analizador_gas_sf6_grande", "analizador_gas_sf6_pequeno", "kit_llenado_sf6", "kit_racores", "pd_scan_descargas_parciales", "camara_termografica_nec", "camara_termografica_irys", "fuentes_110_220v", "secuencimetro"];
+
+                        var existingField = $("input").filter(function() {
+                            return this.name === columnValue;
+                        });
+                
+                        if (existingField.length > 0) {
+                            alert("Ya existe un campo con el nombre '" + columnValue + "'. Por favor, elige un nombre diferente.");
+                        }else{
+                            if (suggestions.includes(columnValue)) {
+                                counter++;
+                        
+                                var newInput = $(`<div><label for="field${counter}">${columnValue}</label>
+                                                    <input type="number" id="id_${columnValue}" name="${columnValue}" /></div>`);
+                        
+                                newInput.appendTo(newFields);
+                            } else {
+                                alert("El valor ingresado no coincide con ninguna sugerencia. Por favor, elige un valor de la lista de sugerencias.");
+                            }
+                        }
+                    });
+            } else {
+                console.error("No se encontraron el botón 'Agregar' o el formulario");
+            }
+                    });
+        </script>
+    </div>
+</body>

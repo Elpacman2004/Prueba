@@ -15,6 +15,8 @@ def process_form(dia_semana, form, sheet, N):
     column = day_to_column[dia_semana]
 
     for field, value in form.cleaned_data.items():
+        if N < 41:
+            break
         if isinstance(value, InMemoryUploadedFile):
             file_content = value.read()
         elif value in ['C', 'NC', 'NA']:

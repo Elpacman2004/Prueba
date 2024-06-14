@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index SE</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'Styles/Index.css' %}">
+</head>
+
+<style>
+    body{
+        background-image: url("{% static 'Img/' %}");
+        background-position: center ;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
+
+<header>
+    <div class="header">
+        <div id="navContainer" class="nav-container">
+            <button class="nav-button" onclick="toggleNavMenu()">☰</button>
+            <div id="navMenu" class="nav-menu">
+                <a href="{% url 'Index' %}">Pagina principal</a>
+                <a href="{% url 'Index preoperational' %}">Formulario de Inspeccion preoperacional</a>
+                <a href="{% url 'IndexSPV' %}">Formulario de solicitud de personal y vinculación</a>
+                <a href="{% url 'Index TD' %}">Formulario para realizar hoja de vida equipos de seguimiento y/o elementos dielectricos</a>
+                <a href="{% url 'InexHVV' %}">Formulario para realizar hoja de vida vehículos</a>
+                
+            </div>
+        </div>
+        <center><h1>Formulario solicitud de equipos HTA y otros.</h1></center>
+    </div>
+</header>
+
+    <body>
+        <center>
+            <div class="Info" method='POST'>
+                <p>{% lorem 5 b random %}</p>
+
+                <a href='{% url 'ChoisesFields' %}'><button>Continuar</button></a>
+            </div>
+        </center>
+
+        <script>
+            function toggleNavMenu() {
+                var x = document.getElementById("navMenu");
+                if (x.style.display === "none") {
+                    x.style.display = "block";
+                } else {
+                    x.style.display = "none";
+                }
+            }
+
+            function toggleNavMenu() {
+                var x = document.getElementById("navMenu");
+                x.classList.toggle("visible");
+            }
+        </script>
+    </body>
+</html>

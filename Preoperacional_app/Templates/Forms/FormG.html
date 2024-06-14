@@ -43,7 +43,7 @@
 
    
 
-     <script>
+    <script>
     $(document).ready(function() {
         document.getElementById('id_vehiculo').classList.add('dropdown-input');
         var vehiculos = new Bloodhound({
@@ -58,11 +58,11 @@
         $('#id_vehiculo').typeahead(null, {
             source: vehiculos
         }).on('typeahead:render', function() {
-            // Mueve el menú desplegable debajo del campo de entrada después de que se haya generado
+            
             $('.tt-menu').insertAfter('#id_vehiculo');
         });
     });
-     </script>
+    </script>
 
 </body>
 

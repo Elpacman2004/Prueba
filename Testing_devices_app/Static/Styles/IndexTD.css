@@ -1,0 +1,155 @@
+@keyframes slideIn {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes colorChangeReverse {
+    0% {
+        background-color: #0000009c;
+        color: #fff;
+    }
+    100% {
+        background-color: #f1f1f1;
+        color: #000;
+    }
+}
+
+@keyframes colorChange {
+    0% {
+        background-color: #f1f1f1;
+        color: #000;
+    }
+    100% {
+        background-color: #0000009c;
+        color: #fff; 
+    }
+}
+
+
+
+header {
+    margin-bottom: 150px; 
+}
+
+body {
+    align-items: center;
+    margin: 20px 0; 
+}
+
+
+.container {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: auto;
+    text-align: center;
+}
+
+
+.Info {
+    background-color: rgba(0, 0, 0, 0.700);
+    max-width: 600px; 
+    padding: 20px; 
+    border-radius: 10px;
+    color: white;
+}
+
+
+h1 {
+    font-size: 24px;
+    
+}
+
+
+p {
+    font-size: 16px; 
+}
+
+
+button {
+    background-color: #008d0c; 
+    color: #fff; 
+    border: none; 
+    padding: 10px 20px; 
+    cursor: pointer; 
+    border-radius: 5px; 
+    font-size: 16px; 
+    margin-top: 20px; 
+    transition: background-color 0.3s, color 0.3s;
+    left: 0; 
+}
+
+button:hover {
+    background-color: #fff; 
+    color: #008d0c; 
+}
+
+
+header {
+    color: #ffffff;
+    background-color: #008d0c;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.nav-menu {
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    transform: translateX(-100%);
+    transition: transform 0.5s, background-color 0.5s;
+    left: 0; 
+    width: 25%; 
+}
+
+
+
+.nav-menu.visible {
+    transform: translateX(0);
+    background-color: #0000009c;
+}
+
+.nav-menu a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+}
+
+.nav-menu a:hover {
+    background-color: #ffffff;
+    color: black;
+    border: 1px solid #0000009c;
+}
+
+.nav-button {
+    cursor: pointer;
+}
+
+.nav-menu.visible {
+    display: block;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 87%;
+}

@@ -1,27 +1,17 @@
 from django.db import models
 from django.utils import timezone
-
-class Vehiculo(models.Model):
-    Placa = models.CharField(max_length=20)
-    Numero_tarjeta_de_propiedad= models.IntegerField()
-    Fecha_emicion_de_revision_tecnomecanica = models.DateField(null=True, blank=True)
-    Marca = models.CharField(max_length=20)
-    Modelo = models.IntegerField()
-    Fecha_vencimiento_SOAT = models.DateField(default=timezone.now, null=True, blank=True)
-    Fecha_vencimiento_poliza = models.DateField(default=timezone.now, null=True, blank=True)
-    def __str__(self):
-        return f"Vehículo {self.Placa}"
+from Hoja_de_vida_vehiculo.models import General_data   
     
-class Histoial_archivos(models.Model):
-    vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE)
-    Nombre_archivo = models.CharField(max_length=200)
+class File_History(models.Model):
+    Vehicle = models.ForeignKey(General_data, on_delete=models.CASCADE)
+    File_path = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Archivo del vehículo {self.vehiculo.Placa}"
+        return f"File to vehicle {self.Vehicle} created at {self.created_at}"
 
 class Datos_generales(models.Model):
-    vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE)
+    vehiculo = models.ForeignKey(General_data, on_delete=models.CASCADE)
     Fecha = models.DateField(default=timezone.now)
     Proyecto = models.CharField(default='PP-000-0000', max_length=18,)
     Nombre = models.CharField(max_length=30)
@@ -64,7 +54,7 @@ class Inspeccion(models.Model):
 
     Nivel_del_combustible = models.ImageField(default = False, upload_to='Nivel gasometro', null=False)
     def __str__(self):
-        return f"Inspeccion de {self.vehiculo} el {self.fecha}"
+        return f"Inspeccion de la fecha {self.fecha}"
 
 class Images(models.Model):
     Nivel_aceite_NC = models.ImageField(default=False, upload_to='Nivel de aceite')
@@ -124,6 +114,7 @@ class BackPart(models.Model):
     labrado_llantas_traseras = models.CharField(max_length=250, null=False, blank=False)
     labrado_llanta_repuesto = models.CharField(max_length=250, null=False, blank=False)
     placa_trasera_legible = models.CharField(max_length=250, null=False, blank=False)
+    Obser= models.TextField(null=True, blank=True)
     
     def __str__(self):
         return "Parte Trasera"

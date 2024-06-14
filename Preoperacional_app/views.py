@@ -1,7 +1,8 @@
 from django .shortcuts import render, redirect
 from django.core.files.storage import default_storage
 from .froms import DatosGeneralesForm, InspeccionForm, FrontPartForm, SideForm, BackPartForm
-from .models import Datos_generales, Inspeccion, Vehiculo, Histoial_archivos, Images
+from .models import File_History, Images
+from Hoja_de_vida_vehiculo.models import General_data, Docments
 from builtins import ValueError
 from openpyxl import Workbook, load_workbook
 from django.http import HttpResponse
@@ -23,6 +24,7 @@ from .Conversor import convert_word_to_pdf
 from docx.opc.exceptions import PackageNotFoundError
 from .Cell_selector import process_form, write_to_sheet, write_message_to_sheet
 from PIL import Image
+import tempfile
 
 
 
@@ -37,8 +39,8 @@ hoy_y_hora = datetime.now().strftime('%Y/%m/%d Hora %H:%M')
 
 def Search(request):
     q = request.GET.get('q', '')
-    vehiculos = Vehiculo.objects.filter(Placa__icontains=q)
-    results = [vehiculo.Placa for vehiculo in vehiculos]
+    vehiculos = General_data.objects.filter(License_plate__icontains=q)
+    results = [vehiculo.License_plate for vehiculo in vehiculos]
     return JsonResponse(results, safe=False)
 
 def Index_preoperational(request):
@@ -46,21 +48,20 @@ def Index_preoperational(request):
 
 def FormG (request):
     if request.method == 'POST':
-        form = DatosGeneralesForm(request.POST, request.FILES)
+        form = DatosGeneralesForm(request.POST)
         if form.is_valid():
             form.save()
             General_Data = form.cleaned_data
-            print (General_Data)
             
             vehiculo = General_Data['vehiculo']
-            
-            
-            historial_archivos = Histoial_archivos.objects.filter(vehiculo=General_Data['vehiculo'])
+                 
+            historial_archivos = File_History.objects.filter(Vehicle=General_Data['vehiculo'])
             if historial_archivos.exists():
+                print('El vehículo ya tiene un archivo.')
                 ultimo_archivo = historial_archivos.latest('created_at')
-                nombre_archivo = ultimo_archivo.Nombre_archivo
-                word_file_name = f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data["vehiculo"])}/Archivos de imagenes/Imagenes.docx'
-                shutil.copyfile(nombre_archivo, f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data["vehiculo"])}/Copy.xlsx')
+                nombre_archivo = ultimo_archivo.File_path
+                word_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
+                shutil.copyfile(nombre_archivo, f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Copy.xlsx")
                 
                 
                 now = timezone.now()
@@ -69,13 +70,13 @@ def FormG (request):
                                        
                 if days_passed == 29:
                     Mes_pasado = now - timezone.timedelta(days=30)
-                    convert_word_to_pdf(f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\{str(General_Data['vehiculo'])}\\Archivos de imagenes\\Imagenes.docx", f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\{str(General_Data['vehiculo'])}\\Archivos de imagenes\\Imagenes del mes {Mes_pasado}.pdf")
+                    convert_word_to_pdf(f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\02. HOJAS DE VIDA VEHICULOS\\{str(General_Data['vehiculo'])}\\Preoperacionales\\Archivos de imagenes\\Imagenes.docx", f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\02. HOJAS DE VIDA VEHICULOS\\{str(General_Data['vehiculo'])}\\Preoperacionales\\Archivos de imagenes\\Imagenes del mes {Mes_pasado}.pdf")
                     
                     doc = Document()
-                    
-                    new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
+                    word_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
+                    new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
                     shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
-                    Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
+                    Historial = File_History.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
                     Historial.save()
                     wb = load_workbook(filename= new_file_name)
                     request.session['nombre_archivo'] = new_file_name
@@ -105,41 +106,41 @@ def FormG (request):
                 request.session['word_file_name'] = word_file_name
                 request.session['Ruta'] = str(General_Data['vehiculo'])
                 request.session['nombre_archivo'] = nombre_archivo
-                
-                doc.add_heading(str(hoy_y_hora), 0)
                    
-            else:  
-                folder_path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}"
-                folder_path2 = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/Archivos de imagenes"
-                os.makedirs(folder_path2, exist_ok=True)
-                os.makedirs(folder_path, exist_ok=True)
-                
-                word_file_name = f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data["vehiculo"])}/Archivos de imagenes/Imagenes.docx'
-                new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{str(General_Data['vehiculo'])}/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
+            else:
+                print('El vehículo no tiene un archivo.')
+                word_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo']).replace('Vehicle ', '')}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
+                vehiculo_sin_vehicle = str(General_Data['vehiculo'])
+                new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{vehiculo_sin_vehicle}/Preoperacionales/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
                 shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
                 doc = Document()
                 
                 doc.add_heading(str(hoy_y_hora), 0)
                 
-                Historial = Histoial_archivos.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
+                Historial = File_History.objects.create(Vehicle = General_Data['vehiculo'], File_path = new_file_name)
                 Historial.save()
+                
                 
                 wb = load_workbook(filename= new_file_name)
                 request.session['word_file_name'] = word_file_name
                 request.session['nombre_archivo'] = new_file_name
                 Semana = 'Semana 1'
                 request.session['Sheet'] = Semana
+                request.session['Ruta'] = str(General_Data['vehiculo'])
                 
             sheet = wb[Semana]
             
-            sheet['F5'] = vehiculo.Marca
-            sheet["F7"] = vehiculo.Numero_tarjeta_de_propiedad
-            sheet["F8"] = vehiculo.Fecha_emicion_de_revision_tecnomecanica
-            sheet["L5"] = vehiculo.Modelo
-            sheet["L7"] = vehiculo.Fecha_vencimiento_SOAT
-            sheet["L8"] = vehiculo.Fecha_vencimiento_poliza
+            instanceG = General_data.objects.get(License_plate=vehiculo)
+            instanceD = Docments.objects.get(id_License_plate=General_Data['vehiculo'].id)
             
-            sheet['F6'] = str(General_Data['vehiculo'])
+            sheet['F5'] = instanceG.Brand
+            sheet["F7"] = instanceD.Diving_license
+            sheet["F8"] = instanceD.Tecno_mechanical
+            sheet["L5"] = instanceG.Model
+            sheet["L7"] = instanceD.Validity_SOAT
+            sheet["L8"] = instanceD.Vality_Inssurance
+            
+            sheet['F6'] = str(instanceG.License_plate)
             sheet['L6'] = General_Data['Proyecto']
             
             write_to_sheet(dia_semana, hora, sheet, General_Data)
@@ -192,7 +193,8 @@ def FormI(request):
                 return redirect('FormG')
             
             nombre_archivo = request.session.get('nombre_archivo')
-            Ruta = request.session.get('Ruta')  
+            Ruta = request.session.get('Ruta')
+            print (Ruta)
             
             inspeccion = form.cleaned_data
             wb = load_workbook(filename= nombre_archivo)
@@ -202,9 +204,10 @@ def FormI(request):
             
             wb_C = None
             try:
-                wb_C = load_workbook(f'C:/Users/Dagelec LTDA//Desktop/Pruebas_excel/{Ruta}/Copy.xlsx') 
+                wb_C = load_workbook(f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{Ruta}/Preoperacionales/Copy.xlsx") 
             except FileNotFoundError:
-                pass
+                shutil.copyfile(nombre_archivo, f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{Ruta}/Preoperacionales/Copy.xlsx")
+                wb_C = load_workbook(f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{Ruta}/Preoperacionales/Copy.xlsx") 
 
             if wb_C is not None:
                 Sheet_O = wb[Sheet]
@@ -230,8 +233,15 @@ def FormI(request):
                     paragraph = doc.add_paragraph()
                     run = paragraph.add_run(file_name)
                     run.font.size = Pt(16)
-                    doc.add_picture(file, width=Inches(3))
+                    try:
+                        image = Image.open(file)
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp:
+                            image.save(temp.name)
+                            doc.add_picture(temp.name, width=Inches(3))
+                    except IOError:
+                        print(f"El archivo {file} no es una imagen válida.")
                     paragraph = doc.add_paragraph()
+                    print(file.name)
                     run = paragraph.add_run(file.name)
                     run.font.size = Pt(12)
 
@@ -292,9 +302,9 @@ def FormFP(request):
             
             wb_C = None
             try:
-                wb_C = load_workbook(f'C:/Users/Dagelec LTDA//Desktop/Pruebas_excel/{Ruta}/Copy.xlsx')
-                print ('try passed')
+                wb_C = load_workbook(f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{Ruta}/Preoperacionales/Copy.xlsx")
             except FileNotFoundError:
+                print ('Fatal error no se encontró el archivo de copia.')
                 pass
 
             if wb_C is not None:
@@ -321,8 +331,15 @@ def FormFP(request):
                     paragraph = doc.add_paragraph()
                     run = paragraph.add_run(file_name)
                     run.font.size = Pt(16)
-                    doc.add_picture(file, width=Inches(3))
+                    try:
+                        image = Image.open(file)
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp:
+                            image.save(temp.name)
+                            doc.add_picture(temp.name, width=Inches(3))
+                    except IOError:
+                        print(f"El archivo {file} no es una imagen válida.")
                     paragraph = doc.add_paragraph()
+                    print(file.name)
                     run = paragraph.add_run(file.name)
                     run.font.size = Pt(12)
             
@@ -363,6 +380,7 @@ def FormS (request):
             global dia_semana
             Sheet = request.session.get('Sheet', None)
             Word = request.session.get('word_file_name', None)
+            Ruta = request.session.get('Ruta')
             
             N_R = request.session.get('N_R', None)
             if Sheet is None:
@@ -378,16 +396,17 @@ def FormS (request):
             
             wb_C = None
             try:
-                wb_C = load_workbook('C:/Users/Dagelec LTDA//Desktop/Pruebas_excel/Vehículo LTS-285/Copy.xlsx') 
+                wb_C = load_workbook(f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{Ruta}/Preoperacionales/Copy.xlsx")
             except FileNotFoundError:
+                print ('Fatal error no se encontró el archivo de copia.')
                 pass
 
             if wb_C is not None:
                 Sheet_O = wb[Sheet]
                 Sheet_C = wb_C[Sheet]
 
-                rows_O = Sheet_O['C32':'M36']  
-                rows_C = Sheet_C['C37':'M41']
+                rows_O = Sheet_O['G32':'M36']  
+                rows_C = Sheet_C['G32':'M36']
 
                 df_O = pd.DataFrame([[cell.value for cell in row] for row in rows_O])
                 df_C = pd.DataFrame([[cell.value for cell in row] for row in rows_C])
@@ -406,8 +425,15 @@ def FormS (request):
                     paragraph = doc.add_paragraph()
                     run = paragraph.add_run(file_name)
                     run.font.size = Pt(16)
-                    doc.add_picture(file, width=Inches(3))
+                    try:
+                        image = Image.open(file)
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp:
+                            image.save(temp.name)
+                            doc.add_picture(temp.name, width=Inches(3))
+                    except IOError:
+                        print(f"El archivo {file} no es una imagen válida.")
                     paragraph = doc.add_paragraph()
+                    print(file.name)
                     run = paragraph.add_run(file.name)
                     run.font.size = Pt(12)
             
@@ -455,17 +481,19 @@ def FormBP(request):
             Word = request.session.get('word_file_name', None)
             
             inspeccion = form.cleaned_data
-            file_path = f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/{Ruta}/Copy.xlsx'
+            file_path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{Ruta}/Preoperacionales/Copy.xlsx"
             wb = load_workbook(filename= nombre_archivo)
             sheet = wb[Sheet]
+            sheet['A64'] = inspeccion['Obser']
             N=37
             
             process_form(dia_semana, form, sheet, N)
             
             wb_C = None
             try:
-                wb_C = load_workbook('C:/Users/Dagelec LTDA//Desktop/Pruebas_excel/Vehículo LTS-285/Copy.xlsx') 
+                wb_C = load_workbook(f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{Ruta}/Preoperacionales/Copy.xlsx")
             except FileNotFoundError:
+                print ('Fatal error no se encontró el archivo de copia.')
                 pass
 
             if wb_C is not None:
@@ -493,8 +521,15 @@ def FormBP(request):
                     paragraph = doc.add_paragraph()
                     run = paragraph.add_run(file_name)
                     run.font.size = Pt(16)
-                    doc.add_picture(file, width=Inches(3))
+                    try:
+                        image = Image.open(file)
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp:
+                            image.save(temp.name)
+                            doc.add_picture(temp.name, width=Inches(3))
+                    except IOError:
+                        print(f"El archivo {file} no es una imagen válida.")
                     paragraph = doc.add_paragraph()
+                    print(file.name)
                     run = paragraph.add_run(file.name)
                     run.font.size = Pt(12)
             

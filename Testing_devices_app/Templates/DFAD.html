@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Description and phtograph and accessoties </title>
+    <link rel="stylesheet" href="{% static "Styles/Only.css" %}">
+</head>
+
+<style>
+    body{
+        background-image: url("{% static '' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
+
+<header>
+</header>
+
+<body>
+    <div class='container'>
+        <h1>Descripcion, foto y accesorios del dispositivo</h1>
+        <form method = 'POST' enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="{{ form.Equipment_description.id_for_label }}">Descripción del equipo:</label>
+            {{form.Equipment_description}}
+            <label for="{{ form.Equipment_photo.id_for_label }}">Foto del equipo:</label>   
+            {{form.Photograph}}
+
+
+            <div id="buttonDiv">
+                <button id="addInput" type="button">+</button>
+            </div>
+            <div id="dynamicInput">
+                <label for="id_Accessories">Accesorios:</label>
+                <div class="Accessories">
+                    <input type="number" name="itemNumber1" placeholder="Item" style="margin-bottom: 10px;">
+                    <input type="number" name="quantity1" placeholder="Cantidad" style="margin-bottom: 10px;">
+                    <input type="text" name="dynamicInput1" placeholder="Descripcion1" style="margin-bottom: 10px;">
+                </div>
+            </div>
+            
+            <label for="{{ form.Observations.id_for_label }}">Observaciones:</label>
+            {{form.Observations}}
+            <center><button type="submit">Enviar</button></center>
+        </form>
+    </div>
+
+    <script>
+        let counter = 1;
+        let dynamicInput = document.getElementById('dynamicInput');
+        let addInputButton = document.getElementById('addInput');
+        let buttonDiv = document.getElementById('buttonDiv');
+    
+        addInputButton.addEventListener('click', function() {
+            if (counter < 26) { 
+                counter++; 
+    
+                let newDiv = document.createElement('div');
+                newDiv.className = 'Accessories';
+
+                let newItemNumber = document.createElement('input');
+                newItemNumber.type = 'number';
+                newItemNumber.name = 'itemNumber' + counter;
+                newItemNumber.style.marginBottom = '10px';
+                newItemNumber.placeholder = 'Item';
+                newDiv.appendChild(newItemNumber);
+    
+                let newQuantity = document.createElement('input');
+                newQuantity.type = 'number';
+                newQuantity.name = 'quantity' + counter;
+                newQuantity.style.marginBottom = '10px';
+                newQuantity.placeholder = 'Cantidad';
+                newDiv.appendChild(newQuantity);
+    
+                let newInput = document.createElement('input');
+                newInput.type = 'text';
+                newInput.name = 'dynamicInput' + counter;
+                newInput.style.marginBottom = '10px';
+                newInput.placeholder = 'Descripcion' + counter;
+                newDiv.appendChild(newInput);
+
+                dynamicInput.appendChild(buttonDiv); 
+                dynamicInput.appendChild(newDiv); 
+            }
+        });
+    </script>
+</body>
+</html>
