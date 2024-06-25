@@ -54,7 +54,7 @@ class IMC_form (forms.ModelForm):
     CHOISEST = [
         ('I', 'Inspeccion'),
         ('P', 'Mantenimiento preventivo'),
-        ('C', 'antenimiento correctivo'),
+        ('C', 'Mantenimiento correctivo'),
         ('CA', 'Calibracion'),
     ]
     

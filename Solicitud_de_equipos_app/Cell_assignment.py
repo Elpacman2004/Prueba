@@ -1,5 +1,7 @@
+from openpyxl import load_workbook
+from django.http import HttpRequest
 
-def Cell_selector ():
+def Cell_selectorE (Name_file, form):
     Cell_assignment = {
         "cmc_356_omicron": "H15",
         "cmc_353_omicron": "H16",
@@ -49,4 +51,93 @@ def Cell_selector ():
         "fuentes_110_220v": "AB29",
         "secuencimetro": "AB28"
     }
+    wb = load_workbook(filename=Name_file)
+    sheet = wb['Hoja1']
     
+    for field, value in form.items():
+        if field in Cell_assignment:
+            cell = Cell_assignment[field]
+            sheet[cell] = value
+            
+    wb.save(Name_file)
+    
+def Cell_selectorT(Name_file, form):
+    Cell_assignment = {
+  "planta_electrica" : 'H35',
+  "juego_de_tierras": 'H36',
+  "caja_herramientas": 'H37',
+  "pertiga_escopeta": 'H38',
+  "pertiga_telescopica": 'H39',
+  "pistola_calor": 'H40',
+  "motor_tool": 'H41',
+  "kit_soldadura_cautin": 'H42',
+  "pistola_silicona": 'H43',
+  "sopladora": 'H44',
+  "taladro": 'H45',
+  "filtro_sf6": 'H46',
+  "compresor_pintura": 'H47',
+  "compresor_aire_seco": 'R35',
+  "equipo_soldadura": 'R36',
+  "radio_transmissor": 'R37',
+  "higrometro": 'R38',
+  "pata_de_cabra": 'R39',
+  "ponchadora_hidraulica": 'R40',
+  "ponchadora_neumatica": 'R41',
+  "cizalla_manual": 'R42',
+  "tarrajero": 'R43',
+  "bomba_para_aceite": 'R44',
+  "pistola_pintura": 'R45',
+  "extension_electrica": 'R46',
+  "esmeril": 'R47',
+  "sonda": 'AB35',
+  "kit_muestra_aceite": 'AB36',
+  "tarraja": 'AB37',
+  "aspiradora": 'AB38',
+  "pulidora": 'AB39',
+  "caladora": 'AB40',
+  "reflector": 'AB41',
+  "tijera_metal": 'AB42',
+  "poleas": 'AB43',
+  "maleta_sf6": 'AB44',
+  "maquina_filtroprensa": 'AB45'
+    } 
+    wb = load_workbook(filename=Name_file)
+    sheet = wb['Hoja1']
+    
+    for field, value in form.items():
+        if field in Cell_assignment:
+            cell = Cell_assignment[field]
+            sheet[cell] = value
+            
+    wb.save(Name_file)
+    
+def Cell_selectorS(Name_file, form):
+    Cell_assignment = {
+        "botiquin" : 'H52', 
+        "camilla" : 'H53',
+        "colombinas" : 'H54',
+        "conos" : 'H55',
+        "candados_seguridad" : 'H56',
+        "detector_tension" : 'H57',
+        "detector_fugas_sf6" : 'H58',
+        "arnes" : 'R52',
+        "linea_vida" : 'R53',
+        "extintor_multiproposito" : 'R54',
+        "guantes_dielectricos" : 'R55',
+        "linterna" : 'R56',
+        "escalera_extension" : 'AB52',
+        "escalera_tijera" : 'AB53',
+        "escalera_2_pasos" : 'AB54',
+        "eslinga_y" : 'AB55',
+        "eslinga_posicionamiento" : 'AB56'
+    }
+    
+    wb = load_workbook(filename=Name_file)
+    sheet = wb['Hoja1']
+    
+    for field, value in form.items():
+        if field in Cell_assignment:
+            cell = Cell_assignment[field]
+            sheet[cell] = value
+            
+    wb.save(Name_file)

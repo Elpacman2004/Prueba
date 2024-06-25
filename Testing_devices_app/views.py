@@ -5,11 +5,13 @@ from openpyxl import load_workbook
 from openpyxl.styles import Border, Side
 from openpyxl.drawing.image import Image
 import os
-from PIL import Image as PilImage
+from PIL import Image
 import cv2
 import numpy as np
 from django.http import JsonResponse
 from .models import GeneralDataDV
+from io import BytesIO
+from openpyxl.drawing.image import Image as OpenpyxlImage
 
 
 
@@ -62,34 +64,30 @@ def DFAD (request):
         Form = DFADForm(request.POST, request.FILES)
         if Form.is_valid():
             File_name = request.session.get('file name')
+            if File_name is None:
+                print("No file name in session")
+                return redirect('Add_devices')
+            
             Sheet_name = request.session.get('Name_sheet')
-            print (Sheet_name)
             
             Cleaned = Form.cleaned_data
-            print (Cleaned)
             
             wb = load_workbook(filename= File_name)
             sheet = wb[Sheet_name]  
             sheet['A11'] = Cleaned['Equipment_description']
-            img = Cleaned['Photograph']
-            with open('temp.png', 'wb+') as temp_file:
-                for chunk in img.chunks():
-                    temp_file.write(chunk)
-                    
-            img = cv2.imread('temp.png')
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            _, thresh = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
-            contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            mask = np.zeros_like(img)
-            cv2.drawContours(mask, contours, -1, (255,255,255), thickness=cv2.FILLED)
-            result = cv2.bitwise_and(img, mask)
-            cv2.imwrite('temp_no_bg.png', result)
             
-            img = PilImage.open('temp_no_bg.png')
-            img = img.resize((320, 260))
-            img.save('temp_no_bg.png')
-            img = Image('temp_no_bg.png')
-            sheet.add_image(img, 'H11')
+            photograph = request.FILES['Photograph']
+            Img = Image.open(photograph)
+            new_size = (320, 260)
+            Img = Img.resize(new_size)
+            
+            img_byte_arr = BytesIO()
+            Img.save(img_byte_arr, format='PNG')
+            img_byte_arr = img_byte_arr.getvalue()
+            
+            img_openpyxl = OpenpyxlImage(BytesIO(img_byte_arr))
+            
+            sheet.add_image(img_openpyxl, 'H11')
             
             row_number = 26
             for key, value in request.POST.items():
@@ -116,8 +114,8 @@ def DFAD (request):
             sheet['A52'] = Cleaned['Observations']
 
             wb.save(File_name)
-
-            os.remove('temp.png')
+            
+            request.session['file name'] = None
             
             return redirect('Index TD')
         else:
@@ -135,9 +133,12 @@ def Inspection_Maintenance_Calibration (request):
             Cleaned = form.cleaned_data
             Path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Mantenimiento/{Cleaned['Device']} Hoja de vida.xlsx"
             wb = load_workbook(filename= Path )
-            sheet = wb['Hoja2']
+            if Cleaned['Activity_type'] == 'CA':
+                sheet = wb['Calibraciónes']
+            else:
+                sheet = wb['Inspecciónes']
             
-            Infiniti = 0
+            Infiniti = 0 
             Row_number =10
             while Infiniti != 1:
                 if sheet[f'A{str(Row_number)}'].value is None:

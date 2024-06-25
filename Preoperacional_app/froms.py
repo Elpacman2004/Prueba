@@ -119,6 +119,10 @@ class BackPartForm (forms.ModelForm):
             'Obser',
         ]
         
+        labels = {
+            'Obser': 'Observaciones',
+        }
+        
         widgets = {
             'Obser': forms.Textarea(attrs={
                 'class': 'form-control',

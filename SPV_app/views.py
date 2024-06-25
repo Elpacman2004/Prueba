@@ -53,8 +53,6 @@ def Staff_requisition (request):
             file_name = request.session.get('file name', None)
             
             Clean_data = form.cleaned_data
-            print(file_name)
-            print(Clean_data)
             
             
             wb = load_workbook(filename= file_name)
@@ -101,7 +99,6 @@ def Data_of_selected_personnel (request):
                 
                 
                 Clean_data = form.cleaned_data
-                print(Clean_data)
                 
                 wb = load_workbook(filename= Name)
                 sheet = wb['F-S4-01 Rev 03']
@@ -214,7 +211,6 @@ def Salary_assignment (request):
                 return redirect('IndexSPV')
             
             Clean_data = form.cleaned_data
-            print(Clean_data)
             wb = load_workbook(filename= Name)
             sheet = wb['F-S4-01 Rev 03']
 
@@ -262,11 +258,14 @@ def Salary_assignment (request):
     
 def Signatures (request):
     if request.method == 'POST':
+        time.sleep(10)
         Name = request.session.get('file name')
+        
+        print(Name)
         
         if Name is None:
                 print("No file name in session")
-                return redirect('IndexSPV')
+                return redirect('General SPV')
         
         signatures_data = [
             request.POST.get('signature1'),

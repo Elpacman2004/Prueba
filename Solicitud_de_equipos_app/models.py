@@ -86,7 +86,7 @@ class Tools_and_Accessories(models.Model):
     pata_de_cabra = models.IntegerField(verbose_name='PATA DE CABRA')
     ponchadora_hidraulica = models.IntegerField(verbose_name='PONCHADORA HIDRAULICA')
     ponchadora_neumatica = models.IntegerField(verbose_name='PONCHADORA NEUMÁTICA')
-    bomba_manual = models.IntegerField(verbose_name='BOMBA MANUAL')
+    cizalla_manual = models.IntegerField(verbose_name='BOMBA MANUAL')
     tarrajero = models.IntegerField(verbose_name='TARRAJERO')
     bomba_para_aceite = models.IntegerField(verbose_name='BOMBA PARA ACEITE')
     pistola_pintura = models.IntegerField(verbose_name='PISTOLA DE PINTURA')

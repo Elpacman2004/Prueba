@@ -32,7 +32,7 @@
                             {% if field.name == 'vehiculo' or field.name == 'fecha' or field.name == 'kilometraje_inicial' or field.name == 'Nivel_del_combustible' %}
                                 {{ field }}
                             {% endif %}
-                            {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_del_combustible' %}
+                            {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_del_combustible' and field.name != 'Obser' %}
                                 <div class ='radio-group' data-group-name="{{ field.label }}">
                                     <ul class="radio-group">
                                         <li class="radio-option">

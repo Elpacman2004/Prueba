@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General data vehicle</title>
+    <link rel="stylesheet" href="{% static "Styles/Request_devices.css" %}">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/corejs-typeahead/1.2.1/typeahead.bundle.min.js"></script>
+</head>
+
+<style>
+    body{
+        background-image: url("{% static 'Img/' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>  
+
+<header>
+</header>
+
+<body>
+    <div class='container'>
+        <h1>{{ title }}</h1>
+        <form id="myForm" method = 'POST'>
+            <div id="newFields"></div>
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div>
+                <h2>Solocitado por</h2>
+                <canvas id="signature-pad-1" width=400 height=200></canvas>
+                <button type="button" id="clear-1">Borrar</button>
+                <input type="hidden" id="signature-input-1" name="signature1">
+            </div>
+
+            <center><button id="save" type="submit">Enviar</button></center>
+        </form>
+
+        <script>
+            $(document).ready(function() {
+                document.getElementById('id_vehiculo').classList.add('dropdown-input');
+                var vehiculos = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.whitespace,
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "{% url 'Search' %}?q=%QUERY",
+                        wildcard: '%QUERY'
+                    }
+                });
+            
+                $('#id_vehiculo').typeahead(null, {
+                    source: vehiculos
+                }).on('typeahead:render', function() {
+                    
+                    $('.tt-menu').insertAfter('#id_vehiculo');
+                });
+            });
+        </script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+
+        <script src="{% static 'Js/Signatures.js' %}"></script>
+    </div>
+</body>

@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signatures</title>
+    <link rel="stylesheet" href={% static "Styles/Signatures.css" %}> 
+</head> 
+
+<style>
+    body{
+        background-image: url("{% static '' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
+
+<body>
+    <div class='container'>
+        <form method="POST" action={% url "Signatures" %}>
+            {% csrf_token %}
+            <h1>Apartado de firmas</h1>
+
+            {% for message in messages %}
+                <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                </div>
+            {% endfor %}
+                <div>
+                    <h2>Solocitado por</h2>
+                    <canvas id="signature-pad-1" width=400 height=200></canvas>
+                    <button type="button" id="clear-1">Borrar</button>
+                    <input type="hidden" id="signature-input-1" name="signature1">
+                </div>
+
+                <center><button id="save" type="submit">Enviar</button></center>
+            </form>
+    <div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+
+    <script src="{% static 'Js/Signatures.js' %}"></script>
+</body>
+</html>

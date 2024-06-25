@@ -15,7 +15,7 @@ def process_form(dia_semana, form, sheet, N):
     column = day_to_column[dia_semana]
 
     for field, value in form.cleaned_data.items():
-        if N < 41:
+        if N > 41:  
             break
         if isinstance(value, InMemoryUploadedFile):
             file_content = value.read()
@@ -82,8 +82,15 @@ def write_message_to_sheet(differences, df_O, sheet, N, dia_semana, hoy):
                 column = day_to_column.get(dia_semana)
 
                 if column:
-                    sheet[column+str(N)] = message
-                    N = N + 1
+                    Loop_break = False
+                    while Loop_break != True:
+                        existing_value = sheet[column+str(N)].value
+                        if existing_value is not None:
+                            N = N + 1
+                        else:
+                            sheet[column+str(N)] = message
+                            N = N + 1
+                            Loop_break = True
                 else:
                     dia_semana = dia_semana[hoy.weekday()]
     return N

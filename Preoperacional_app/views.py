@@ -183,18 +183,16 @@ def FormI(request):
         
         if form.is_valid():
             
-            
             Sheet = request.session.get('Sheet', None)
             Word = request.session.get('word_file_name', None)
             if Sheet is None:
                 return redirect('FormG')
             elif Word is None:
-                print ('¡¡¡Eror el archivo word no existe!!!')
+                print ('¡¡¡Error el archivo word no existe!!!')
                 return redirect('FormG')
             
             nombre_archivo = request.session.get('nombre_archivo')
             Ruta = request.session.get('Ruta')
-            print (Ruta)
             
             inspeccion = form.cleaned_data
             wb = load_workbook(filename= nombre_archivo)
@@ -241,7 +239,6 @@ def FormI(request):
                     except IOError:
                         print(f"El archivo {file} no es una imagen válida.")
                     paragraph = doc.add_paragraph()
-                    print(file.name)
                     run = paragraph.add_run(file.name)
                     run.font.size = Pt(12)
 
@@ -286,8 +283,6 @@ def FormFP(request):
             N_R = request.session.get('N_R', None)
             Word = request.session.get('word_file_name', None)
             Ruta = request.session.get('Ruta')
-            
-            print (Ruta)
             
             if Sheet is None:
                 return redirect('FormG')
@@ -352,7 +347,7 @@ def FormFP(request):
             Titulo = 'Formulario de Inspección de la parte delantera.'
             error = 'Tienes que llenar todos los campos para continuar con el formulario.'
             form = FrontPartForm(request.POST, request.FILES)
-            return render(request, 'Forms/Formpruebas.html', {'form': form, 
+            return render(request, 'Forms/Form.html', {'form': form, 
                                                               'error': error, 
                                                               'Title': Titulo
                                                               })
@@ -484,7 +479,9 @@ def FormBP(request):
             file_path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{Ruta}/Preoperacionales/Copy.xlsx"
             wb = load_workbook(filename= nombre_archivo)
             sheet = wb[Sheet]
-            sheet['A64'] = inspeccion['Obser']
+            existing_value = sheet['A64'].value
+            new_value = f'{str(existing_value)}, {inspeccion["Obser"]}'
+            sheet['A64'] = new_value
             N=37
             
             process_form(dia_semana, form, sheet, N)
