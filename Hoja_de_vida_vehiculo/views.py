@@ -16,17 +16,17 @@ def General_Data(request):
             Cleaned= form.cleaned_data
             print (Cleaned)
             
-            folder_path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}"
-            folder_Service_History = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}/Hoja de vida"
-            folder_preoperational = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}/Preoperacionales"
-            folder_images = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}/Preoperacionales/Archivos de imagenes"
+            folder_path = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}"
+            folder_Service_History = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}/Hoja de vida"
+            folder_preoperational = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}/Preoperacionales"
+            folder_images = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}/Preoperacionales/Archivos de imagenes"
             os.makedirs(folder_path, exist_ok=True)
             os.makedirs(folder_Service_History, exist_ok=True)
             os.makedirs(folder_preoperational, exist_ok=True)
             os.makedirs(folder_images, exist_ok=True)
             
-            File_path = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}/Hoja de vida/{str(Cleaned['License_plate'])}.xlsx"
-            shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/PlantillaHVV.xlsx', File_path)
+            File_path = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(Cleaned['License_plate'])}/Hoja de vida/{str(Cleaned['License_plate'])}.xlsx"
+            shutil.copy('C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/PlantillaHVV.xlsx', File_path)
             
             request.session['File_path'] = File_path
             

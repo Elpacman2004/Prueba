@@ -60,22 +60,22 @@ def FormG (request):
                 print('El vehículo ya tiene un archivo.')
                 ultimo_archivo = historial_archivos.latest('created_at')
                 nombre_archivo = ultimo_archivo.File_path
-                word_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
-                shutil.copyfile(nombre_archivo, f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Copy.xlsx")
+                word_file_name = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
+                shutil.copyfile(nombre_archivo, f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Copy.xlsx")
                 
                 
                 now = timezone.now()
                 days_passed = (now - ultimo_archivo.created_at).days
                    
                                        
-                if days_passed == 29:
+                if days_passed >= 29:
                     Mes_pasado = now - timezone.timedelta(days=30)
-                    convert_word_to_pdf(f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\02. HOJAS DE VIDA VEHICULOS\\{str(General_Data['vehiculo'])}\\Preoperacionales\\Archivos de imagenes\\Imagenes.docx", f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\02. HOJAS DE VIDA VEHICULOS\\{str(General_Data['vehiculo'])}\\Preoperacionales\\Archivos de imagenes\\Imagenes del mes {Mes_pasado}.pdf")
+                    convert_word_to_pdf(f"C:\\Users\\Dagelec LTDA\\Documents\\Eco_forms\\Pruebas_excel\\02. HOJAS DE VIDA VEHICULOS\\{str(General_Data['vehiculo'])}\\Preoperacionales\\Archivos de imagenes\\Imagenes.docx", f"C:\\Users\\Dagelec LTDA\\Desktop\\Pruebas_excel\\02. HOJAS DE VIDA VEHICULOS\\{str(General_Data['vehiculo'])}\\Preoperacionales\\Archivos de imagenes\\Imagenes del mes {Mes_pasado}.pdf")
                     
                     doc = Document()
-                    word_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
-                    new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
-                    shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
+                    word_file_name = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
+                    new_file_name = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo'])}/Preoperacionales/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
+                    shutil.copy('C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/Plantilla.xlsx', new_file_name)
                     Historial = File_History.objects.create(vehiculo = General_Data['vehiculo'], Nombre_archivo = new_file_name)
                     Historial.save()
                     wb = load_workbook(filename= new_file_name)
@@ -109,10 +109,10 @@ def FormG (request):
                    
             else:
                 print('El vehículo no tiene un archivo.')
-                word_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo']).replace('Vehicle ', '')}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
+                word_file_name = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{str(General_Data['vehiculo']).replace('Vehicle ', '')}/Preoperacionales/Archivos de imagenes/Imagenes.docx"
                 vehiculo_sin_vehicle = str(General_Data['vehiculo'])
-                new_file_name = f"C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{vehiculo_sin_vehicle}/Preoperacionales/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
-                shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/Plantilla.xlsx', new_file_name)
+                new_file_name = f"C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/02. HOJAS DE VIDA VEHICULOS/{vehiculo_sin_vehicle}/Preoperacionales/{str(General_Data['vehiculo'])}_{date_str}.xlsx"
+                shutil.copy('C:/Users/Dagelec LTDA/Documents/Eco_forms/Pruebas_excel/Plantilla.xlsx', new_file_name)
                 doc = Document()
                 
                 doc.add_heading(str(hoy_y_hora), 0)
@@ -181,6 +181,7 @@ def FormI(request):
             sensor_externo_velocidad_NC = request.FILES['sensor_externo_velocidad_NC'] if 'sensor_externo_velocidad_NC' in request.FILES else None, 
         )
         
+        print(request.POST)
         if form.is_valid():
             
             Sheet = request.session.get('Sheet', None)
@@ -251,7 +252,10 @@ def FormI(request):
             return redirect ('FormFP')
         else:
             Titulo = 'Formulario de Inspección.'
+            missing_fields = [field.label for field in form if field.errors]
             error = 'Tienes que llenar todos los campos para continuar con el formulario.'
+            if missing_fields:
+                error += 'Campos faltantes: ' + ', '.join(missing_fields)
             form = InspeccionForm()
             return render(request, 'Forms/Form.html', {'form': form,
                                                               'error': error,
