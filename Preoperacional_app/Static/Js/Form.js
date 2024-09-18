@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     const radioGroups = document.querySelectorAll('.radio-group');
+    const DateElements = {
+        'botiquin_primeros_auxilios': 'id_First_Aid_Kit_LI',
+        'extintor': 'id_Fire_Extinguisher_ED',
+        'kit_derrames': 'id_Spill_Kit_LI'
+    };
 
     radioGroups.forEach(group => {
         const radios = group.querySelectorAll('.form-check-input');
@@ -43,6 +48,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isValid) {
             event.preventDefault();
             alert(missingFields.join('\n'));
+        }
+    });
+
+    form.addEventListener('change', (event) => {     
+        const target = event.target;
+        const targetName = target.name;
+        if (targetName === 'botiquin_primeros_auxilios' || targetName === 'extintor' || targetName === 'kit_derrames') {
+            const mappedValue = DateElements[targetName];
+            const specificElement = document.getElementById(mappedValue);
+            if (specificElement) {
+                if (target.value === 'NC' || target.value === 'NA') {
+                    specificElement.required = false;
+                }
+                else {
+                    specificElement.required = true;
+                }
+            }
         }
     });
 });

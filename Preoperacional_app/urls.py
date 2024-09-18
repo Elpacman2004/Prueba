@@ -2,7 +2,6 @@ from django.urls import path
 from. import views
 
 urlpatterns = [
-    path('', views.Index_preoperational, name='Index preoperational'),
     path('Search/', views.Search, name='Search'),
     path('GeneralForm/', views.FormG, name='FormG'),
     path('InspectionForm/', views.FormI, name='FormI'),

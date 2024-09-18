@@ -15,7 +15,7 @@ body {
     padding: 20px;
     background-color: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px #00000080;
     color: #fff;
 }
 
@@ -32,6 +32,7 @@ label {
 input[type="text"],
 input[type="number"],
 input[type="password"],
+input[type="date"],
 .form-check-input,
 textarea {
     width: calc(100% - 20px);

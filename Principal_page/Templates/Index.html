@@ -1,61 +1,155 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index page</title>
-    <link rel="stylesheet" href="{% static "Styles/Index.css" %}">
-</head>
-<style>
-    body{
-        background-image: url("{% static 'Img/fonod de pantalla  2024x_Art board 2.png' %}");
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-attachment: fixed;
-    }
-</style>
-
-<header>
-    <div class="header">
-        <div id="navContainer" class="nav-container">
-            <button class="nav-button" onclick="toggleNavMenu()">☰</button>
-            <div id="navMenu" class="nav-menu">
-                <a href="{% url 'Index preoperational' %}">Formulario de Inspeccion preoperacional</a>
-                <a href="{% url 'IndexSPV' %}">Formulario de solicitud de personal y vinculación</a>
-                <a href="{% url 'Index TD' %}">Formulario para realizar hoja de vida equipos de seguimiento y/o elementos dielectricos</a>
-                <a href="{% url 'InexHVV' %}">Formulario para realizar hoja de vida vehículos</a>
-                <a href="{% url 'IndexSE' %}">Formulario de Solicitud de equipos HTA y otros</a>
-            </div>
-        </div>
-        <h1>Ecosistema de formularios Dagelec LTDA.</h1>
-    </div>
-</header>
-
-<body>
-    <center>
-        <div class="Info" method='POST'>
-            <h2>¡Bienvenido al ecosistema de formularios de Dagelec LTDA!</h2>    
-            <p>Esta es una página web diseñada para diligenciar los múltiples formularios que se manejan en la empresa. Se creó con el propósito de ayudar con el diligenciamiento de formularios, pensado para que sea más eficiente para nuestro grupo de trabajo. Además, el propósito más grande es el ahorro de papel, lo cual es una ayuda a nivel ambiental. Esto se incrementa debido a que somos una empresa grande y en expansión.</p>
-        </div>
-    </center>
-
-    <script>
-        function toggleNavMenu() {
-            var x = document.getElementById("navMenu");
-            if (x.style.display === "none") {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+		<script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
+		<script type="text/javascript">
+			window.tailwind.config = {
+				darkMode: ['class'],
+				theme: {
+					extend: {
+						colors: {
+							border: 'hsl(var(--border))',
+							input: 'hsl(var(--input))',
+							ring: 'hsl(var(--ring))',
+							background: 'hsl(var(--background))',
+							foreground: 'hsl(var(--foreground))',
+							primary: {
+								DEFAULT: 'var(--primary)',
+								foreground: 'hsl(var(--primary-foreground))'
+							},
+							secondary: {
+								DEFAULT: 'hsl(var(--secondary))',
+								foreground: 'hsl(var(--secondary-foreground))'
+							},
+							destructive: {
+								DEFAULT: 'hsl(var(--destructive))',
+								foreground: 'hsl(var(--destructive-foreground))'
+							},
+							muted: {
+								DEFAULT: 'hsl(var(--muted))',
+								foreground: 'hsl(var(--muted-foreground))'
+							},
+							accent: {
+								DEFAULT: 'hsl(var(--accent))',
+								foreground: 'hsl(var(--accent-foreground))'
+							},
+							popover: {
+								DEFAULT: 'hsl(var(--popover))',
+								foreground: 'hsl(var(--popover-foreground))'
+							},
+							card: {
+								DEFAULT: 'hsl(var(--card))',
+								foreground: 'hsl(var(--card-foreground))'
+							},
+						},
+					}
+				}
+			}
+		</script>
+		<style type="text/tailwindcss">
+            body{
+                background-image: url("{% static 'Img/fonod de pantalla  2024x_Art board 2.png' %}");
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-attachment: fixed;
             }
-        }
+			@layer base {
+				:root {
+					--background: 0 0% 100%;
+					--foreground: 240 10% 3.9%;
+					--card: 0 0% 100%;
+					--card-foreground: 240 10% 3.9%;
+					--popover: 0 0% 100%;
+					--popover-foreground: 240 10% 3.9%;
+					--primary: #008d0c;
+					--primary-foreground: 355.7 100% 97.3%;
+					--secondary: 240 4.8% 95.9%;
+					--secondary-foreground: 240 5.9% 10%;
+					--muted: 240 4.8% 95.9%;
+					--muted-foreground: 240 3.8% 46.1%;
+						--accent: 240 4.8% 95.9%;
+						--accent-foreground: 240 5.9% 10%;
+					--destructive: 0 84.2% 60.2%;
+					--destructive-foreground: 0 0% 98%;
+					--border: 240 5.9% 90%;
+					--input: 240 5.9% 90%;
+					--ring: 142.1 76.2% 36.3%;
+									}
+									.dark {	
+										--background: 20 14.3% 4.1%;
+					--foreground: 0 0% 95%;
+					--popover: 0 0% 9%;
+					--popover-foreground: 0 0% 95%;
+					--card: 24 9.8% 10%;
+					--card-foreground: 0 0% 95%;
+					--primary: 142.1 70.6% 45.3%;
+					--primary-foreground: 144.9 80.4% 10%;
+					--secondary: 240 3.7% 15.9%;
+					--secondary-foreground: 0 0% 98%;
+					--muted: 0 0% 15%;
+					--muted-foreground: 240 5% 64.9%;
+					--accent: 12 6.5% 15.1%;
+					--accent-foreground: 0 0% 98%;
+					--destructive: 0 62.8% 30.6%;
+					--destructive-foreground: 0 85.7% 97.3%;
+					--border: 240 3.7% 15.9%;
+					--input: 240 3.7% 15.9%;
+					--ring: 142.4 71.8% 29.2%;
+								}
+			}
+		</style>
+    </head>
+    <body>
+        <div class="relative min-h-screen">
+        <header class="flex items-center justify-between p-4 bg-primary">
+            <button id="menuButton" class="text-primary-foreground hover:text-primary/80 focus:outline-none" aria-label="Open Menu">☰</button>
+            <h1 class="text-white text-lg font-bold">Formularios Dagelec</h1>
+            <img src="{% static 'Img/Logo Vertical 9.png' %}" alt="logo" class="w-12 h-12" />
+        </header>
 
-        function toggleNavMenu() {
-            var x = document.getElementById("navMenu");
-            x.classList.toggle("visible");
-        }
-    </script>
-    
-</body>
+        <center>
+            <div class="p-5 max-w-md bg-black/70 text-white rounded-lg mt-20" method='POST'>
+                <h1>¡Bienvenido al ecosistema de formularios de Dagelec LTDA!</h1>    
+                <p>Esta es una página web diseñada para diligenciar los múltiples formularios que se manejan en la empresa. Se creó con el propósito de ayudar con el diligenciamiento de formularios, pensado para que sea más eficiente para nuestro grupo de trabajo. Además, el propósito más grande es el ahorro de papel, lo cual es una ayuda a nivel ambiental. Esto se incrementa debido a que somos una empresa grande y en expansión.</p>
+            </div>
+        </center>
+
+        <div id="menu" class="fixed inset-y-0 left-0 z-50 bg-primary w-64 shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out">
+            <div class="flex items-center justify-between p-4">
+                <h2 class="text-white text-lg font-bold">Menu</h2>
+                <button id="closeButton" class="text-primary-foreground hover:text-red-500 focus:outline-none" aria-label="Close Menu">X</button>
+            </div>
+            <nav class="flex flex-col p-4">
+                <a href="{% url 'FormG' %}" class="text-primary-foreground hover:bg-secondary hover:text-secondary-foreground p-2 rounded">Inspeccion preoperacional</a>
+				<!--<a href="{% url 'IndexSPV' %}"class="text-primary-foreground hover:bg-secondary hover:text-secondary-foreground p-2 rounded">Formulario de solicitud de personal y vinculación</a>-->
+                <!--<a href="{% url 'Index TD' %}"class="text-primary-foreground hover:bg-secondary hover:text-secondary-foreground p-2 rounded">Formulario para realizar hoja de vida equipos de seguimiento y/o elementos dielectricos</a>-->
+                <!--<a href="{% url 'Generalvehicle' %}"class="text-primary-foreground hover:bg-secondary hover:text-secondary-foreground p-2 rounded">Formulario para realizar hoja de vida vehículos</a>-->
+                <!--<a href="{% url 'IndexSE' %}"class="text-primary-foreground hover:bg-secondary hover:text-secondary-foreground p-2 rounded">Formulario de Solicitud de equipos HTA y otros</a>-->
+				<a href="{% url 'Maintenance' %}"class="text-primary-foreground hover:bg-secondary hover:text-secondary-foreground p-2 rounded">Mantenimiento de equipos de cómputo</a>
+				<a href="{% url 'PreOp_equpment' %}"class="text-primary-foreground hover:bg-secondary hover:text-secondary-foreground p-2 rounded">Pre-operacional de equipos de medición</a>
+            </nav>
+        </div>
+          <div id="overlay" class="fixed inset-0 bg-black/50 z-40" style="display: none;"></div>
+        </div>
+
+        <script>
+            const menuButton = document.getElementById('menuButton');
+            const menu = document.getElementById('menu');
+            const closeButton = document.getElementById('closeButton');
+            const overlay = document.getElementById('overlay');
+            menuButton.addEventListener('click', () => {
+              menu.classList.toggle('translate-x-0');
+              overlay.style.display = 'block';
+            });
+            closeButton.addEventListener('click', () => {
+              menu.classList.toggle('translate-x-0');
+              overlay.style.display = 'none';
+            });
+          </script>
+  </body>
 </html>

@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Inspección</title>
+    <link rel="stylesheet" href={% static "Styles/FormMaintenance.css" %}>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
+    <script src="{% static 'js/Styles.js' %}" defer></script>
+</head>
+<style> 
+    body {
+        background-image: url("{% static 'Img/Wallpaper 1.jpg' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+</style>
+<body>
+.   <div class="container max-w-xl">
+    <h2><center>{{Title}}</center></h2>
+        <form method="POST" enctype="multipart/form-data" id="maintenanceForm">
+            {% csrf_token %}
+            
+            <div class='Error'>
+                {{ error }}
+            </div>
+               
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label name="{{ field.label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+
+                {% if field.name != 'computer_equipment_id' and field.name != 'inspection_date' and field.name != 'brand' and field.name != 'maintenance_type' and field.name != 'equipment_type' and field.name != 'corrective_maintenance_notes' and field.name != 'general_observations' and field.name != 'received_by' and field.name != 'executed_by'%}
+
+                <div id="Menu {{ field.label }}" class="hidden">
+                    <div class="mb-4 flex">
+                        <div class="w-1/2 pr-2">
+                            <label for="observaciones_{{ field.name }}" class="block text-sm font-medium">Observaciones:</label>
+                            <textarea id="observaciones_{{ field.name }}" name="observaciones_{{ field.name }}" class="mt-1 block w-full border border-border rounded-md p-2 color"></textarea>
+                        </div>
+                        <div class="w-1/2 pl-2">
+                            <label for="acciones_{{ field.name }}" class="block text-sm font-medium">Acciones por tomar:</label>
+                            <textarea id="acciones_{{ field.name }}" name="acciones_{{ field.name }}" class="mt-1 block w-full border border-border rounded-md p-2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                {% endif %}	
+            {% endfor %}
+            <div class="Signatures_group">
+                <label class="block mb-2" for="firma">Firma de  la persona que recibe:</label>
+                <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-background" id="firmaCanvas" name="Recibido por" style="touch-action: none;" required></canvas>
+                <input type="hidden" id="firmaData" name="firmaData">
+                <div class="flex justify-between">
+                    <button type="button" id='clearButton' class="bg-destructive text-destructive-foreground hover:bg-destructive/80 p-2 rounded-lg" onclick="clearCanvas('firmaCanvas', 'firmaData')">Borrar</button>
+                </div>
+            </div>
+
+            <div class="Signatures_group">
+                <label class="block mb-2" for="firma">Firma de la persona que ejecuto el proceso:</label>
+                <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-background" id="firmaCanvas2" name="Ejecutado por" style="touch-action: none;" required></canvas>
+                <input type="hidden" id="firmaData2" name="firmaData2">
+                <div class="flex justify-between">
+                    <button type="button" id='clearButton2' class="bg-destructive text-destructive-foreground hover:bg-destructive/80 p-2 rounded-lg" onclick="clearCanvas('firmaCanvas2', 'firmaData2')">Borrar</button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" onclick="return validateSignatures()">Enviar</button>
+        </form>
+    </div>
+    <script src="{% static 'Js/Menu.js' %}"></script>
+    <script src="{% static 'Js/SignaturesM.js' %}"></script>
+    <script>
+        function clearCanvas(canvasId, hiddenInputId) {
+            var canvas = document.getElementById(canvasId);
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById(hiddenInputId).value = '';
+        }
+    
+        function validateSignatures() {
+            var canvas1 = document.getElementById('firmaCanvas');
+            var canvas2 = document.getElementById('firmaCanvas2');
+            var firmaData1 = document.getElementById('firmaData');
+            var firmaData2 = document.getElementById('firmaData2');
+    
+            if (isCanvasBlank(canvas1) || isCanvasBlank(canvas2)) {
+                alert('Por favor, firme ambos campos.');
+                return false;
+            }
+    
+            // Store the canvas data in the hidden inputs
+            firmaData1.value = canvas1.toDataURL();
+            firmaData2.value = canvas2.toDataURL();
+    
+            return true;
+        }
+    
+        function isCanvasBlank(canvas) {
+            var blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+            return canvas.toDataURL() == blank.toDataURL();
+        }
+    </script>
+</body>

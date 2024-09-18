@@ -9,7 +9,7 @@
 </head>
 <style> 
     body {
-        background-image: url("{% static 'Img/Inspeccion.jfif' %}");
+        background-image: url("{% static 'Img/Wallpaper 1.jpg' %}");
         background-position: center;
         background-repeat: no-repeat;
         background-size: cover;
@@ -29,21 +29,21 @@
             </div>
                {% for field in form %}
                     <label for="{{ field.auto_id }}">{{ field.label }}</label>
-                            {% if field.name == 'vehiculo' or field.name == 'fecha' or field.name == 'kilometraje_inicial' or field.name == 'Nivel_del_combustible' %}
+                            {% if field.name == 'vehiculo' or field.name == 'fecha' or field.name == 'kilometraje_inicial' or field.name == 'Nivel_del_combustible' or field.name == 'First_Aid_Kit_LI' or field.name == 'Fire_Extinguisher_ED' or field.name == 'Spill_Kit_LI' %}
                                 {{ field }}
                             {% endif %}
-                            {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_del_combustible' and field.name != 'Obser' %}
+                            {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_del_combustible' and field.name != 'Obser' and field.name != 'First_Aid_Kit_LI' and field.name != 'Fire_Extinguisher_ED' and field.name != 'Spill_Kit_LI' %}
                                 <div class ='radio-group' data-group-name="{{ field.label }}">
                                     <ul class="radio-group">
                                         <li class="radio-option">
-                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}_C" name="{{ field.html_name }}" value="C">
+                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}_C" name="{{ field.html_name }}" value="C" required>
                                             <label class="form-check-label" for="{{ field.auto_id }}_C">Cumple</label>
                                         </li>
                                     </ul>
                                             
                                     <ul class="radio-group">
                                         <li class="radio-option">
-                                            <input class="form-check-input radio-input" type="radio" id="{{ field.auto_id }}_NC" name="{{ field.html_name }}" value="NC">
+                                            <input class="form-check-input radio-input" type="radio" id="{{ field.auto_id }}_NC" name="{{ field.html_name }}" value="NC" required>
                                             <label class="form-check-label" for="{{ field.auto_id }}_NC">No cumple</label>
                                             <div class='Menu-de-Imagen' id="{{ field.auto_id }}_NC" style="display: none;">
                                                 <label for="{{ field.auto_id }}_NC">Subir Imagen:</label>
@@ -54,7 +54,7 @@
 
                                     <ul class="radio-group">
                                         <li class="radio-option">
-                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}_NA" name="{{ field.html_name }}" value="NA">
+                                            <input class="form-check-input" type="radio" id="{{ field.auto_id }}_NA" name="{{ field.html_name }}" value="NA" required>
                                             <label class="form-check-label" for="{{ field.auto_id }}_NA">No Aplica</label>
                                         </li> 
                                     </ul>
@@ -68,4 +68,7 @@
         </form>
     </div>
     <script src="{% static 'Js/Form.js' %}"></script>
+    <script>
+        
+    </script>
 </body>

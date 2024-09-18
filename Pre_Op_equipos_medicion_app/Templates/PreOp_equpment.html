@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Inspección</title>
+    <link rel="stylesheet" href={% static "Styles/FormMaintenance.css" %}>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
+    <script src="{% static 'js/Styles.js' %}" defer></script>
+</head>
+<style> 
+    body {
+        background-image: url("{% static 'Img/Wallpaper 1.jpg' %}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+</style>
+<body>
+.   <div class="container max-w-xl">
+    <h2><center>{{Title}}</center></h2>
+        <form method="POST" enctype="multipart/form-data" id="maintenanceForm">
+            {% csrf_token %}
+            
+            <div class='Error'>
+                {{ error }}
+            </div>
+
+            {{ form.as_p }}
+
+            <button type="submit" class="btn btn-primary" onclick="return validateSignatures()">Enviar</button>
+        </form>
+    </div>
+</body>

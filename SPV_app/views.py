@@ -19,10 +19,10 @@ def GeneralForm_SPV (request):
         form = GeneralDataForm(request.POST)
         if form.is_valid():
             Clean_data = form.cleaned_data
-            New_file =  f'C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/SPV/{Clean_data["Name"]} SPV.xlsx'
+            New_file =  f'C:/Users/Dagelec LTDA/Desktop/Eco_forms/Eco_forms/Pruebas_excel/SPV/{Clean_data["Name"]} SPV.xlsx'
             request.session['file name'] = New_file
             
-            shutil.copy('C:/Users/Dagelec LTDA/Desktop/Pruebas_excel/PlantillaSPV.xlsx', New_file)
+            shutil.copy('C:/Users/Dagelec LTDA/Desktop/Eco_forms/Eco_forms/Pruebas_excel/PlantillaSPV.xlsx', New_file)
             
             wb = load_workbook(filename= New_file)
             

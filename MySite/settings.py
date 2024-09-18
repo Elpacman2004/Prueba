@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-r68j&iw0e0m_0kc5g&xh$1@^6ny&u9hmp6tm)l8sj_dvtt21r1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.138', '186.155.37.84']
 
 
 # Application definition
@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'Principal_page',
     'dal',
     'dal_select2',
-    'Solicitud_de_equipos_app'
+    'Solicitud_de_equipos_app',
+    'Mtto_equipos_de_computo',
+    'Pre_Op_equipos_medicion_app'
 ]
 
 MIDDLEWARE = [
