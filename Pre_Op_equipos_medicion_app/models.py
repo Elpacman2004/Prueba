@@ -1,8 +1,8 @@
 from django.db import models
 
 class EquipmentInspection(models.Model):
-    place = models.CharField(max_length=50)
-    id_eqipment = models.CharField(max_length=50)
+    place = models.CharField(default='DAGELEC LTDA', max_length=50)
+    id_eqipment = models.CharField(default='EDP-XXX', max_length=50)
     date = models.DateField()
     brand = models.CharField(max_length=50)
     serial = models.CharField(max_length=50)
@@ -28,7 +28,8 @@ class EquipmentInspection(models.Model):
     dc_current_input = models.CharField(max_length=50)
     ac_current_input = models.CharField(max_length=50)
     resistance_measurement = models.CharField(max_length=50)
-    notes = models.TextField()
+    notes = models.TextField(null=True, blank=True)
+    recommendations = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.id} - {self.date}"

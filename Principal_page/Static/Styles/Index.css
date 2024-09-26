@@ -1,163 +1,73 @@
-@keyframes slideIn {
-    0% {
-        transform: translateX(-100%);
+@layer base {
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 240 10% 3.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 240 10% 3.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 240 10% 3.9%;
+        --primary: #008d0c;
+        --primary-foreground: 355.7 100% 97.3%;
+        --secondary: 240 4.8% 95.9%;
+        --secondary-foreground: 240 5.9% 10%;
+        --muted: 240 4.8% 95.9%;
+        --muted-foreground: 240 3.8% 46.1%;
+        --accent: 240 4.8% 95.9%;
+        --accent-foreground: 240 5.9% 10%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 5.9% 90%;
+        --input: 240 5.9% 90%;
+        --ring: 142.1 76.2% 36.3%;
+        --button: #b8cd17;
+     }
+        .dark {	
+            --background: 20 14.3% 4.1%;
+            --foreground: 0 0% 95%;
+            --popover: 0 0% 9%;
+            --popover-foreground: 0 0% 95%;
+            --card: 24 9.8% 10%;
+            --card-foreground: 0 0% 95%;
+            --primary: 142.1 70.6% 45.3%;
+            --primary-foreground: 144.9 80.4% 10%;
+            --secondary: 240 3.7% 15.9%;
+            --secondary-foreground: 0 0% 98%;
+            --muted: 0 0% 15%;
+            --muted-foreground: 240 5% 64.9%;
+            --accent: 12 6.5% 15.1%;
+            --accent-foreground: 0 0% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 0 85.7% 97.3%;
+            --border: 240 3.7% 15.9%;
+            --input: 240 3.7% 15.9%;
+            --ring: 142.4 71.8% 29.2%;
     }
-    100% {
-        transform: translateX(0);
-    }
 }
 
-@keyframes slideOut {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+.btn {
+    position: relative;
+    overflow: hidden;
+    color: black;
+    transition: color 0.5s ease-in-out;
 }
-
-@keyframes colorChangeReverse {
-    0% {
-        background-color: #0000009c;
-        color: #fff;
-    }
-    100% {
-        background-color: #f1f1f1;
-        color: #000;
-    }
-}
-
-@keyframes colorChange {
-    0% {
-        background-color: #f1f1f1;
-        color: #000;
-    }
-    100% {
-        background-color: #0000009c;
-        color: #fff; 
-    }
-}
-
-
-
-header {
-    margin-bottom: 100px; 
-}
-
-body {
-    align-items: center;
-    margin: 20px 0; 
-}
-
-
-.container {
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    height: 100vh; 
-    text-align: center; 
-}
-
-
-.Info {
-    background-color: rgba(0, 0, 0, 0.700);
-    max-width: 600px; 
-    padding: 20px; 
-    border-radius: 10px;
-    color: white;
-}
-
-
-h1 {
-    font-size: 24px;
-    
-}
-
-
-p {
-    font-size: 16px; 
-}
-
-
-button {
-    background-color: #008d0c; 
-    color: #fff; 
-    border: none; 
-    padding: 10px 20px; 
-    cursor: pointer; 
-    border-radius: 5px; 
-    font-size: 16px; 
-    margin-top: 20px; 
-    transition: background-color 0.3s, color 0.3s;
-    left: 0; 
-}
-
-button:hover {
-    background-color: #fff; 
-    color: #008d0c; 
-}
-
-
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem/* 16px */;
-    color: #ffffff;
-    background-color: #008d0c;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-}
-
-.nav-menu {
+.btn::before {
+    content: '';
     position: absolute;
-    background-color: #f1f1f1;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    top: 0;
+    left: 100%;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    transition: left 0.3s ease-in-out;
+    z-index: 0;
+}
+.btn:hover::before {
+    left: 0;
+}
+.btn:hover {
+  color: #000000; /* Color del texto en hover */
+}
+.btn span {
+    position: relative;
     z-index: 1;
-    transform: translateX(-100%);
-    transition: transform 0.5s, background-color 0.5s;
-    left: 0; 
-    width: 25%; 
-}
-
-
-
-.nav-menu.visible {
-    transform: translateX(0);
-    background-color: #0000009c;
-}
-
-.nav-menu a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    color: inherit;
-}
-
-.nav-menu a:hover {
-    background-color: #ffffff;
-    color: black;
-    border: 1px solid #0000009c;
-}
-
-.nav-button {
-    
-    cursor: pointer;
-}
-
-.nav-menu.visible {
-    display: block;
-}
-
-.header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 70%;
-}
-
-.logo {
-    height: 100px;
 }

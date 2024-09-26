@@ -63,9 +63,9 @@ def Maintenance (request):
             ws['A35'] = Equipment_data['corrective_maintenance_notes']
             ws['A43'] = Equipment_data['general_observations']
             Cell_value = ws['A52'].value
-            ws['A52'] = f'{Cell_value} {Equipment_data['received_by']}'
+            ws['A52'] = f"{Cell_value} {Equipment_data['received_by']}"
             Cell_value = ws['K52'].value
-            ws['K52'] = f'{Cell_value} {Equipment_data['executed_by']}'
+            ws['K52'] = f"{Cell_value} {Equipment_data['executed_by']}"
 
             if ';base64,' in request.POST['firmaData'] and ';base64,' in request.POST['firmaData2']:
                 firma1_path, firma2_path = Proces_signatures(request)

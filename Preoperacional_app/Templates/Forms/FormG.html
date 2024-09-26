@@ -11,51 +11,8 @@
         <script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
-            <script type="text/javascript">
-                window.tailwind.config = {
-                    darkMode: ['class'],
-                    theme: {
-                        extend: {
-                            colors: {
-                                border: 'hsl(var(--border))',
-                                input: 'hsl(var(--input))',
-                                ring: 'hsl(var(--ring))',
-                                background: 'hsl(var(--background))',
-                                foreground: 'hsl(var(--foreground))',
-                                primary: {
-                                    DEFAULT: 'hsl(var(--primary))',
-                                    foreground: 'hsl(var(--primary-foreground))'
-                                },
-                                secondary: {
-                                    DEFAULT: 'var(--secondary)',
-                                    foreground: 'hsl(var(--secondary-foreground))'
-                                },
-                                destructive: {
-                                    DEFAULT: 'hsl(var(--destructive))',
-                                    foreground: 'hsl(var(--destructive-foreground))'
-                                },
-                                muted: {
-                                    DEFAULT: 'hsl(var(--muted))',
-                                    foreground: 'hsl(var(--muted-foreground))'
-                                },
-                                accent: {
-                                    DEFAULT: 'hsl(var(--accent))',
-                                    foreground: 'hsl(var(--accent-foreground))'
-                                },
-                                popover: {
-                                    DEFAULT: 'hsl(var(--popover))',
-                                    foreground: 'hsl(var(--popover-foreground))'
-                                },
-                                card: {
-                                    DEFAULT: 'var(--card)',
-                                    foreground: 'var(--card-foreground)'
-                                },
-                            },
-                        }
-                    }
-                }
-            </script>
-            <style type="text/tailwindcss">
+        <script src="{% static 'js/Styles_PreOpV.js' %}" defer></script>
+        <style>
             body {
                 background-image: url("{% static 'Img/Wallpaper 1.jpg' %}");
                 background-position: center;
@@ -66,11 +23,11 @@
                 padding: 0;
                 font-family: Arial, sans-serif;
             } 
-            </style>
-      </head>
-      <body>
+        </style>
+        </head>
+        <body>
         <div class="flex flex-col items-center justify-center min-h-screen">
-        <div class="bg-card p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div class="bg-card p-6 rounded-lg shadow-lg max-w-4xl my-14 mx-auto">
             <h2 class="text-2xl font-bold text-foreground mb-4">Datos generales</h2>
         
             <form method="POST">
@@ -80,7 +37,7 @@
                 {% csrf_token %}
                 {{ form.as_p }}
                 <label class="block mb-2 text-muted-foreground" for="firma">Firma:</label>
-                <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-background" id="firmaCanvas" name="firmaCanvas" style="touch-action: none;" required></canvas>
+                <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-white max-h-40" id="firmaCanvas" name="firmaCanvas" style="touch-action: none;" required></canvas>
                 <input type="hidden" id="firmaData" name="firmaData">
                 <div class="flex justify-between">
                     <button type="button" class="bg-destructive text-destructive-foreground hover:bg-destructive/80 p-2 rounded-lg" onclick="clearCanvas()">Borrar</button>
@@ -91,27 +48,25 @@
         </div>
         <script src="{% static 'Js/SignaturesG.js' %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
-
-        <script src="{% static 'Js/Signatures.js' %}"></script>
         <script>
-        $(document).ready(function() {
-            document.getElementById('id_vehiculo').classList.add('dropdown-input');
-            var vehiculos = new Bloodhound({
-                datumTokenizer: Bloodhound.tokenizers.whitespace,
-                queryTokenizer: Bloodhound.tokenizers.whitespace,
-                remote: {
-                    url: "{% url 'Search' %}?q=%QUERY",
-                    wildcard: '%QUERY'
-                }
+            $(document).ready(function() {
+                document.getElementById('id_vehiculo').classList.add('dropdown-input');
+                var vehiculos = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.whitespace,
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "{% url 'Search' %}?q=%QUERY",
+                        wildcard: '%QUERY'
+                    }
+                });
+            
+                $('#id_vehiculo').typeahead(null, {
+                    source: vehiculos
+                }).on('typeahead:render', function() {
+                    
+                    $('.tt-menu').insertAfter('#id_vehiculo');
+                });
             });
-        
-            $('#id_vehiculo').typeahead(null, {
-                source: vehiculos
-            }).on('typeahead:render', function() {
-                
-                $('.tt-menu').insertAfter('#id_vehiculo');
-            });
-        });
         </script>
     </body>
 </html>

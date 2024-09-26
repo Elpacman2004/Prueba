@@ -175,7 +175,7 @@ class BackPartForm (forms.ModelForm):
         
         widgets = {
             'Obser': forms.Textarea(attrs={
-                'class': 'form-control',
+                'class': 'text-black',
                 'rows': 4,
             }),
         }

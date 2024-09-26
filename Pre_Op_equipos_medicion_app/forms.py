@@ -9,34 +9,34 @@ class EquipmentInspection_form(forms.ModelForm):
         ('No aplica', 'No aplica'),
     ]
 
-    visual_check = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Inspección visual')
-    loose_fasteners = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Clavos, tornillos, astillas, tuercas salidas')
-    power_connections_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Conexiones de alimentacion estan en buen estado')
-    power_button_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Equipo enciende pulsador de encendido/apagado en buen estado')
-    fuses_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Fusibles completos')
-    power_cable_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Cable de poder en buen estado')
-    noises = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Ruidos Extraños')
-    loose_parts = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Elementos sueltos')
-    temp_humidity = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificar temperatura del equipo en°C y humedad')
-    display_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Display en buen estado')
-    other_components_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Otros componentes del equipo estan en buen estado')
-    current_cable = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Cable de Corrientes(800A)')
-    voltage_cables = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Cables de tension_(2_kV)')
-    measurement_cables = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Cables de medida')
-    ac_voltage_outputs = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificación salidas de tensión AC')
-    dc_current_outputs = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificación salidas de corriente DC')
-    ac_current_outputs = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificación salidas de corriente AC')
-    ac_voltage_input = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificación entrada de tensión AC')
-    dc_voltage_input = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificación entrada de tensión DC')
-    dc_current_input = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificación entrada de corriente DC')
-    ac_current_input = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificación entrada de corriente AC')
-    resistance_measurement = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios'}), label='Verificación medida de resistencia')
+    visual_check = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Inspección visual')
+    loose_fasteners = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Clavos, tornillos, astillas, tuercas salidas')
+    power_connections_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Conexiones de alimentacion estan en buen estado')
+    power_button_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Equipo enciende pulsador de encendido/apagado en buen estado')
+    fuses_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Fusibles completos')
+    power_cable_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Cable de poder en buen estado')
+    noises = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Ruidos Extraños')
+    loose_parts = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Elementos sueltos')
+    temp_humidity = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificar temperatura del equipo en°C y humedad')
+    display_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Display en buen estado')
+    other_components_ok = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Otros componentes del equipo estan en buen estado')
+    current_cable = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Cable de Corrientes(800A)')
+    voltage_cables = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Cables de tension_(2_kV)')
+    measurement_cables = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Cables de medida')
+    ac_voltage_outputs = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificación salidas de tensión AC')
+    dc_current_outputs = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificación salidas de corriente DC')
+    ac_current_outputs = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificación salidas de corriente AC')
+    ac_voltage_input = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificación entrada de tensión AC')
+    dc_voltage_input = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificación entrada de tensión DC')
+    dc_current_input = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificación entrada de corriente DC')
+    ac_current_input = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificación entrada de corriente AC')
+    resistance_measurement = forms.ChoiceField(choices=Choises, widget=forms.RadioSelect(attrs={'class': 'Radios m-4 flex justify-around'}), label='Verificación medida de resistencia')
 
     class Meta:
         model = EquipmentInspection
         fields = [
             'place', 
-            'id', 
+            'id_eqipment', 
             'date', 
             'brand', 
             'serial', 
@@ -62,7 +62,8 @@ class EquipmentInspection_form(forms.ModelForm):
             'dc_current_input', 
             'ac_current_input', 
             'resistance_measurement', 
-            'notes'
+            'notes',
+            'recommendations',
         ]
 
         labels = {
@@ -94,9 +95,11 @@ class EquipmentInspection_form(forms.ModelForm):
             'ac_current_input': 'Verificación entrada de corriente AC',
             'resistance_measurement': 'Verificación medida de resistencia',
             'notes': 'Observaciones',
+            'recommendations': 'Recomendaciones',
         }
 
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
             'notes': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+            'recommendations': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
         }

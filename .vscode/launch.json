@@ -1,19 +1,23 @@
 {
-    // Use IntelliSense para saber los atributos posibles.
-    // Mantenga el puntero para ver las descripciones de los existentes atributos.
-    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Depurador de Python: Django",
+            "name": "Debugger: Django",
             "type": "debugpy",
             "request": "launch",
+            "program": "C:\\Users\\Dagelec LTDA\\Desktop\\Eco_forms\\Eco_forms\\manage.py",
             "args": [
                 "runserver"
             ],
             "django": true,
-            "autoStartBrowser": false,
-            "program": "C:\\Users\\Dagelec LTDA\\OneDrive\\Documentos\\Eco_forms\\manage.py"
+            "autoStartBrowser": true,
+            "env": {
+                "PYTHONPATH": "C:\\Users\\Dagelec LTDA\\Desktop\\Eco_forms\\Eco_forms\\Env\\Scripts\\python.exe"
+            },
         }
     ]
 }

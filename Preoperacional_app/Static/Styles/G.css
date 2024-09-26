@@ -107,7 +107,7 @@ span {
     :root {
         --background: 0 0% 100%;
         --foreground: 0 0% 100%;
-        --card: #00000080;
+        --card: rgba(0, 0, 0, 0.7);
         --card-foreground: 240 10% 3.9%;
         --popover: 0 0% 100%;
         --popover-foreground: 240 10% 3.9%;

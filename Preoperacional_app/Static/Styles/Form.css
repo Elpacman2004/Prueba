@@ -10,7 +10,6 @@ body {
 }
 
 .container {
-    max-width: 600px;
     margin: 50px auto;
     padding: 20px;
     background-color: rgba(0, 0, 0, 0.7);
@@ -195,4 +194,8 @@ form {
     height: 8px;
     border-radius: 50%;
     background: white;
+}
+
+.form-control{
+    color: #000;
 }

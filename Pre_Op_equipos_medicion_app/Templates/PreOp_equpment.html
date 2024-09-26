@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Inspección</title>
-    <link rel="stylesheet" href={% static "Styles/FormMaintenance.css" %}>
+    <link rel="stylesheet" href={% static "Styles/PeOpequpment.css" %}>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
     <script src="{% static 'js/Styles.js' %}" defer></script>
@@ -25,7 +25,7 @@
 <body>
 .   <div class="container max-w-xl">
     <h2><center>{{Title}}</center></h2>
-        <form method="POST" enctype="multipart/form-data" id="maintenanceForm">
+        <form method="POST" id="Pre-Op">
             {% csrf_token %}
             
             <div class='Error'>
@@ -34,7 +34,15 @@
 
             {{ form.as_p }}
 
+            <label class="block mb-2" for="firma">Firma:</label>
+            <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-white max-h-40" id="firmaCanvas" name="firmaCanvas" style="touch-action: none;" required></canvas>
+            <input type="hidden" id="firmaData" name="firmaData">
+            <button type="button" class="bg-destructive text-destructive-foreground hover:bg-destructive/80 p-2 rounded-lg" onclick="clearCanvas()">Borrar</button>
+            
             <button type="submit" class="btn btn-primary" onclick="return validateSignatures()">Enviar</button>
         </form>
     </div>
+    <script src="{% static 'Js/SignaturesPreOp.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <script src="{% static 'js/Elements.js' %}" defer></script>
 </body>

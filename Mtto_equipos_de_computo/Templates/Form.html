@@ -20,6 +20,7 @@
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
+        background-max-width: 100%;
     }
 </style>
 <body>
@@ -59,7 +60,7 @@
             {% endfor %}
             <div class="Signatures_group">
                 <label class="block mb-2" for="firma">Firma de  la persona que recibe:</label>
-                <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-background" id="firmaCanvas" name="Recibido por" style="touch-action: none;" required></canvas>
+                <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-background max-h-40" id="firmaCanvas" name="Recibido por" style="touch-action: none;" required></canvas>
                 <input type="hidden" id="firmaData" name="firmaData">
                 <div class="flex justify-between">
                     <button type="button" id='clearButton' class="bg-destructive text-destructive-foreground hover:bg-destructive/80 p-2 rounded-lg" onclick="clearCanvas('firmaCanvas', 'firmaData')">Borrar</button>
@@ -68,7 +69,7 @@
 
             <div class="Signatures_group">
                 <label class="block mb-2" for="firma">Firma de la persona que ejecuto el proceso:</label>
-                <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-background" id="firmaCanvas2" name="Ejecutado por" style="touch-action: none;" required></canvas>
+                <canvas class="border border-border rounded-lg p-2 w-full mb-4 bg-background max-h-40" id="firmaCanvas2" name="Ejecutado por" style="touch-action: none;" required></canvas>
                 <input type="hidden" id="firmaData2" name="firmaData2">
                 <div class="flex justify-between">
                     <button type="button" id='clearButton2' class="bg-destructive text-destructive-foreground hover:bg-destructive/80 p-2 rounded-lg" onclick="clearCanvas('firmaCanvas2', 'firmaData2')">Borrar</button>

@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Inspección</title>
     <link rel="stylesheet" href={% static "Styles/Form.css" %}>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
+    <script src="{% static 'js/Styles_PreOpV.js' %}" defer></script>
 </head>
 <style> 
     body {
@@ -20,20 +23,20 @@
     }
 </style>
 <body>
-.    <div class="container">
+.    <div class="container max-w-4xl p-8">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            <h2>{{Title}}</h2>
+            <h2 class="text-white text-center font-bold text-2xl my-5">{{Title}}</h2>
             <div class='Error'>
                 {{error}}
-            </div>
+            </div >
                {% for field in form %}
                     <label for="{{ field.auto_id }}">{{ field.label }}</label>
                             {% if field.name == 'vehiculo' or field.name == 'fecha' or field.name == 'kilometraje_inicial' or field.name == 'Nivel_del_combustible' or field.name == 'First_Aid_Kit_LI' or field.name == 'Fire_Extinguisher_ED' or field.name == 'Spill_Kit_LI' %}
                                 {{ field }}
                             {% endif %}
                             {% if field.name != 'vehiculo' and field.name != 'fecha' and field.name != 'kilometraje_inicial' and field.name != 'Nivel_del_combustible' and field.name != 'Obser' and field.name != 'First_Aid_Kit_LI' and field.name != 'Fire_Extinguisher_ED' and field.name != 'Spill_Kit_LI' %}
-                                <div class ='radio-group' data-group-name="{{ field.label }}">
+                                <div class ='radio-group mb-5' data-group-name="{{ field.label }}">
                                     <ul class="radio-group">
                                         <li class="radio-option">
                                             <input class="form-check-input" type="radio" id="{{ field.auto_id }}_C" name="{{ field.html_name }}" value="C" required>

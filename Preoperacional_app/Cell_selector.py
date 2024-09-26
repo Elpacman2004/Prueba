@@ -105,13 +105,13 @@ def Signatures(hoy_y_hora, General_Data, request, sheetF):
 
     col = 'A'
     while True:
-        for row in range(1, 17, 5):
+        for row in range(1, 27, 5):  
                 cell1 = sheetF[f'{col}{row}']
                 cell2 = sheetF[f'{col}{row + 1}']
                 cell3 = sheetF[f'{col}{row + 2}']
                 cell4 = sheetF[f'{col}{row + 3}']
                 cell5 = sheetF[f'{col}{row + 4}']
-                if cell1.value is None and cell4.value is None and cell5.value is None and row <= 15:
+                if cell1.value is None and cell4.value is None and cell5.value is None and row <= 25:
                     cell1.value = hoy_y_hora
                     cell1.border = thin_border
                     cell2.value = General_Data['Origen']
@@ -138,8 +138,8 @@ def write_message_to_sheet(differences, df_O, sheet, N, dia_semana, hoy):
     for index, row in differences.iterrows():
         for column in differences.columns:
             if column[1] == 'self' and pd.notna(row[column]):
-                previous_value = row[(column[0], "other")]
-                new_value = row[(column[0], "self")]
+                previous_value = row[(column[0], "self")]
+                new_value = row[(column[0], "other")]
 
                 if previous_value == 'None':
                     dia_semana = ''
